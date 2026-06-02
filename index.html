@@ -111,7 +111,7 @@
   .ritem.no{background:#fdf2f2}
   .ritem .icon{font-weight:800;margin-right:6px}
   footer{text-align:center;font-size:12px;color:#a0aec0;padding:20px}
-  .hidden{display:none}
+  .hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -498,25 +498,34 @@ function revealAns(btn){
 }
 
 /* ---------- QUIZ ---------- */
-let qi=0, answers=[];
-function startQuiz(){ qi=0; answers=[]; question(); }
+let qi=0, answers=[], QZ=[];
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function buildActiveQuiz(){
+  QZ = QUIZ.map(item=>{
+    const opts = item.o.map((text,idx)=>({text, correct: idx===item.c}));
+    shuffle(opts);
+    return { q:item.q, o:opts.map(o=>o.text), c:opts.findIndex(o=>o.correct), e:item.e };
+  });
+  shuffle(QZ);
+}
+function startQuiz(){ qi=0; answers=[]; buildActiveQuiz(); question(); }
 function question(){
-  const item = QUIZ[qi];
+  const item = QZ[qi];
   let html = `<div class="card">
-    <div class="qcount">Question ${qi+1} of ${QUIZ.length}</div>
-    <div class="bar"><div style="width:${Math.round(qi/QUIZ.length*100)}%"></div></div>
+    <div class="qcount">Question ${qi+1} of ${QZ.length}</div>
+    <div class="bar"><div style="width:${Math.round(qi/QZ.length*100)}%"></div></div>
     <div class="qtext">${item.q}</div>`;
   item.o.forEach((opt,k)=>{
     html += `<button class="opt" onclick="answer(${k})">${opt}</button>`;
   });
   html += `<div class="explain"></div>
-    <button class="btn primary block hidden" id="nextbtn" onclick="next()">${qi<QUIZ.length-1?'Next →':'See my score 🎉'}</button>
+    <button class="btn primary block hidden" id="nextbtn" onclick="next()">${qi<QZ.length-1?'Next →':'See my score 🎉'}</button>
     <button class="btn ghost block" style="margin-top:14px" onclick="home()">Quit to topics</button>
   </div>`;
   app.innerHTML = html; window.scrollTo(0,0);
 }
 function answer(k){
-  const item = QUIZ[qi];
+  const item = QZ[qi];
   if(answers[qi]!==undefined) return;
   answers[qi]=k;
   const opts = app.querySelectorAll('.opt');
@@ -531,24 +540,24 @@ function answer(k){
   if(k===item.c) addGold(10, 'quiz'+qi, 'Correct!');
   app.querySelector('#nextbtn').classList.remove('hidden');
 }
-function next(){ if(qi<QUIZ.length-1){qi++;question();} else results(); }
+function next(){ if(qi<QZ.length-1){qi++;question();} else results(); }
 function results(){
-  let score=0; answers.forEach((a,i)=>{ if(a===QUIZ[i].c) score++; });
-  if(score===QUIZ.length) addGold(100, 'perfect', 'PERFECT QUIZ BONUS!');
-  const pct = Math.round(score/QUIZ.length*100);
+  let score=0; answers.forEach((a,i)=>{ if(a===QZ[i].c) score++; });
+  if(score===QZ.length) addGold(100, 'perfect', 'PERFECT QUIZ BONUS!');
+  const pct = Math.round(score/QZ.length*100);
   let msg, color;
   if(pct>=90){msg="Amazing! You're test-ready! 🏆";color="var(--green)";}
   else if(pct>=75){msg="Great job — almost there! 💪";color="var(--green)";}
   else if(pct>=60){msg="Good start — review the misses below. 📖";color="var(--gold)";}
   else{msg="Keep studying — you've got this! Review below. 📚";color="var(--red)";}
   let html = `<div class="card scorebox">
-      <div class="big" style="color:${color}">${score}/${QUIZ.length}</div>
+      <div class="big" style="color:${color}">${score}/${QZ.length}</div>
       <div class="msg">${msg}</div>
       <button class="btn gold" onclick="startQuiz()">↻ Retake quiz</button>
       <button class="btn ghost block" onclick="home()">Back to topics</button>
     </div>
     <div class="card review"><h4>Review your answers</h4>`;
-  QUIZ.forEach((item,i)=>{
+  QZ.forEach((item,i)=>{
     const a=answers[i], ok=a===item.c;
     html += `<div class="ritem ${ok?'ok':'no'}">
       <span class="icon">${ok?'✅':'❌'}</span>${item.q}<br>
