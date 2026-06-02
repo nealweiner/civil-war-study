@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pre–Civil War Study App</title>
+<style>
+  :root{
+    --navy:#1e3a5f; --navy2:#2c5282; --gold:#d69e2e; --cream:#fdf6e3;
+    --green:#2f855a; --red:#c53030; --paper:#ffffff; --ink:#1a202c;
+    --soft:#edf2f7; --line:#e2e8f0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(160deg,#f7fafc,#e8eef5);color:var(--ink);line-height:1.5}
+  .topbar{position:sticky;top:0;z-index:50}
+  header{background:var(--navy);color:#fff;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  header h1{margin:0;font-size:19px;letter-spacing:.3px}
+  header p{margin:4px 0 0;font-size:13px;opacity:.85}
+  .stats{display:flex;justify-content:center;gap:10px;background:#16304f;padding:8px 10px;border-top:1px solid #294c73}
+  .stats .pill{background:rgba(255,255,255,.1);color:#fff;border-radius:99px;padding:5px 13px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .stats .pill.gold{background:rgba(214,158,46,.25);color:#ffe08a}
+
+  /* campaign map */
+  .campaign{background:linear-gradient(135deg,#1e3a5f,#2c5282);color:#fff;border:none}
+  .campaign h3{margin:0 0 4px;color:#fff;font-size:17px}
+  .campaign .sub{font-size:13px;opacity:.85;margin:0 0 12px}
+  .vbar{position:relative;height:16px;background:#9aa7b5;border-radius:99px;overflow:visible;margin:18px 0 8px}
+  .vfill{height:100%;background:linear-gradient(90deg,#3a6ea5,#5b8fc4);border-radius:99px;transition:width .6s}
+  .vflag{position:absolute;top:-13px;transform:translateX(-50%);font-size:22px;transition:left .6s;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+  .vlabel{text-align:center;font-weight:700;font-size:15px;margin-bottom:12px}
+  .terrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:7px}
+  .terr{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:7px 5px;text-align:center;font-size:11px;opacity:.65;transition:.3s}
+  .terr.won{background:rgba(91,143,196,.45);border-color:#7fb0e0;opacity:1;font-weight:700}
+  .terr .tflag{font-size:18px;display:block;margin-bottom:2px}
+  .victory{margin-top:14px;background:var(--gold);color:#1a202c;border-radius:12px;padding:12px;text-align:center;font-weight:800;font-size:16px}
+  .resetlink{display:block;text-align:center;color:#a0aec0;font-size:12px;margin-top:14px;cursor:pointer;text-decoration:underline}
+
+  /* gold toast */
+  #toasts{position:fixed;left:0;right:0;bottom:24px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:100}
+  .toast{background:var(--navy);color:#ffe08a;font-weight:800;padding:10px 18px;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.3);font-size:15px;animation:toastpop .4s ease,toastfade .4s ease 1.6s forwards}
+  .toast.terr{background:var(--gold);color:#1a202c}
+  @keyframes toastpop{from{opacity:0;transform:translateY(18px) scale(.9)}to{opacity:1;transform:none}}
+  @keyframes toastfade{to{opacity:0;transform:translateY(-10px)}}
+  .wrap{max-width:760px;margin:0 auto;padding:16px}
+  .bar{height:8px;background:var(--soft);border-radius:99px;overflow:hidden;margin:14px 0 4px}
+  .bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--gold),#f6c34a);transition:width .4s}
+  .barlabel{font-size:12px;color:#4a5568;text-align:center;margin-bottom:6px}
+
+  /* nav buttons */
+  .btn{display:inline-block;border:none;cursor:pointer;font-size:16px;font-weight:600;border-radius:12px;padding:13px 18px;transition:transform .08s,box-shadow .2s}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--navy2);color:#fff;box-shadow:0 3px 8px rgba(44,82,130,.3)}
+  .btn.gold{background:var(--gold);color:#1a202c;box-shadow:0 3px 8px rgba(214,158,46,.35)}
+  .btn.ghost{background:#fff;color:var(--navy2);border:2px solid var(--navy2)}
+  .btn.block{display:block;width:100%;margin-top:10px;text-align:center}
+
+  /* topic list */
+  .card{background:var(--paper);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid var(--line)}
+  .topiccard{display:flex;align-items:center;gap:14px;cursor:pointer}
+  .topiccard .emoji{font-size:30px;flex-shrink:0}
+  .topiccard .t{flex:1}
+  .topiccard .t h3{margin:0;font-size:16px}
+  .topiccard .t span{font-size:12px;color:#718096}
+  .check{font-size:20px;color:var(--green)}
+  .check.todo{color:#cbd5e0}
+
+  /* reading view */
+  .summary{font-size:16px}
+  .summary h2{color:var(--navy);margin-top:0}
+  .summary ul{padding-left:20px}
+  .summary li{margin:6px 0}
+  .tag{display:inline-block;background:var(--soft);color:var(--navy2);font-size:11px;font-weight:700;
+    padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+
+  .flash{background:#fffdf5;border:1px solid #f0e3b8;border-radius:14px;padding:14px;margin:12px 0}
+  .flash .q{font-weight:600}
+  .flash .qlabel{color:var(--gold);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .ans{margin-top:10px;background:#e9f6ee;border:1px solid #b7e0c6;color:#22543d;border-radius:10px;padding:10px;display:none;font-weight:600}
+  .ans.show{display:block;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .flashin{display:block;width:100%;margin-top:10px;padding:11px 13px;font-size:15px;border:2px solid var(--line);
+    border-radius:10px;outline:none;font-family:inherit}
+  .flashin:focus{border-color:var(--navy2)}
+  .flashin[readonly]{background:#f7fafc;color:#4a5568}
+  .reveal{margin-top:10px;background:#fff;border:2px solid var(--gold);color:#9c6f0e;font-weight:700;
+    border-radius:10px;padding:9px 14px;cursor:pointer;font-size:14px}
+
+  .navrow{display:flex;gap:10px;margin-top:18px}
+  .navrow .btn{flex:1}
+
+  /* quiz */
+  .qcount{font-size:13px;color:#718096;text-align:center;margin-bottom:6px}
+  .qtext{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:14px}
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;
+    padding:13px 15px;margin:9px 0;font-size:15px;cursor:pointer;transition:.15s}
+  .opt:hover{border-color:var(--navy2)}
+  .opt.correct{background:#e9f6ee;border-color:var(--green);color:#22543d;font-weight:700}
+  .opt.wrong{background:#fdecec;border-color:var(--red);color:#742a2a}
+  .opt.disabled{cursor:default}
+  .explain{margin-top:12px;background:var(--soft);border-radius:12px;padding:12px;font-size:14px;display:none}
+  .explain.show{display:block}
+  .explain b{color:var(--navy)}
+
+  .scorebox{text-align:center;padding:10px}
+  .scorebox .big{font-size:54px;font-weight:800;color:var(--navy)}
+  .scorebox .msg{font-size:18px;margin:6px 0 16px;font-weight:600}
+  .review h4{margin:18px 0 6px;color:var(--navy)}
+  .ritem{font-size:14px;padding:10px;border-radius:10px;margin:6px 0;border:1px solid var(--line)}
+  .ritem.ok{background:#f0faf4}
+  .ritem.no{background:#fdf2f2}
+  .ritem .icon{font-weight:800;margin-right:6px}
+  footer{text-align:center;font-size:12px;color:#a0aec0;padding:20px}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <header>
+    <h1>📗 Pre–Civil War: March to Victory</h1>
+    <p>General Vaughn — study to earn gold &amp; free territory for the Union!</p>
+  </header>
+  <div id="stats" class="stats"></div>
+</div>
+
+<div class="wrap" id="app"></div>
+<footer>Study packet for the era before the Civil War • For the Union! 🇺🇸</footer>
+<div id="toasts"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const TOPICS = [
+  { emoji:"🔑", title:"Key Vocabulary",
+    summary:`<span class="tag">Definitions</span>
+      <ul>
+       <li><b>Abolitionist</b> – a person who wanted to <b>abolish (end) slavery</b>.</li>
+       <li><b>Sectionalism</b> – loyalty to your own <b>region</b> (North or South) instead of the whole country; each region puts its own interests first.</li>
+       <li><b>States' rights</b> – the belief that <b>states</b>, not the federal government, should make big decisions (like whether to allow slavery).</li>
+       <li><b>Popular sovereignty</b> – letting the <b>people of a territory vote</b> on whether slavery is allowed.</li>
+       <li><b>Underground Railroad</b> – a secret <b>network of routes and safe houses</b> that helped enslaved people escape (not a real train!).</li>
+      </ul>`,
+    flash:[
+      {q:"What does an <i>abolitionist</i> want to do?", a:"End slavery."},
+      {q:"What is <i>popular sovereignty</i>?", a:"Letting the people of a territory vote on whether to allow slavery."}
+    ]},
+  { emoji:"🔥", title:"Nat Turner's Rebellion",
+    summary:`<span class="tag">Day 1</span>
+      <p>Nat Turner was an enslaved <b>preacher</b> who led a <b>violent slave rebellion in Virginia</b>. He and his followers killed about <b>55–60 white people</b> before it was <b>crushed</b>. Turner was <b>caught and executed</b>.</p>
+      <p><b>Biggest result:</b> the frightened South passed <b>harsher laws</b> to control enslaved people — including banning teaching them to read.</p>`,
+    flash:[
+      {q:"Who led the rebellion, and where?", a:"Nat Turner, an enslaved preacher, in Virginia."},
+      {q:"What was one <i>result</i> of the rebellion?", a:"The South passed harsher laws controlling enslaved people."}
+    ]},
+  { emoji:"✊", title:"Angelina Grimké",
+    summary:`<span class="tag">Day 1</span>
+      <p>A <b>white Southern woman</b> raised on a plantation who became an <b>abolitionist and women's rights activist</b>. She argued slavery was a <b>sin and un-Christian</b>, and that it broke the Declaration of Independence's promise that "all men are created equal."</p>
+      <p>She <b>convinced women using religion and morality</b>, urging them to <b>read, pray, speak up, and sign petitions</b> to the <b>state legislatures</b> — even if only six women signed.</p>`,
+    flash:[
+      {q:"Why did Grimké believe slavery was wrong?", a:"It was a sin and un-Christian (and against 'all men are created equal')."},
+      {q:"What action did she want Southern women to take?", a:"Sign petitions and speak up to the legislatures."}
+    ]},
+  { emoji:"📰", title:"William Lloyd Garrison",
+    summary:`<span class="tag">Day 2</span>
+      <p>A <b>white abolitionist</b> who published the famous anti-slavery newspaper <b><i>The Liberator</i></b>. He demanded the <b>immediate</b> end of slavery and helped found the American Anti-Slavery Society.</p>`,
+    flash:[
+      {q:"What newspaper did Garrison publish?", a:"The Liberator."},
+      {q:"Did he want slavery ended slowly or immediately?", a:"Immediately."}
+    ]},
+  { emoji:"📚", title:"Frederick Douglass",
+    summary:`<span class="tag">Day 2</span>
+      <p>Born <b>enslaved</b>, Douglass <b>escaped</b> and became the most famous <b>Black abolitionist</b> — a powerful speaker and writer who published his <b>autobiography</b> and a newspaper, the <b>North Star</b>.</p>
+      <ul>
+        <li><b>Learning to read:</b> his <b>mistress</b> taught him the <b>alphabet</b>, but her husband made her stop — so he traded <b>bread to poor white boys</b> for reading lessons.</li>
+        <li><b>How reading felt:</b> it made him <b>frustrated and even suicidal</b> ("a curse rather than a blessing") because it showed him how wrong slavery was — but it also gave him <b>hope of freedom</b>.</li>
+        <li><b>Fighting Mr. Covey (a "slave-breaker"):</b> Douglass <b>fought back</b>; afterward Covey never beat him again and Douglass was <b>not punished</b>. It was a <b>turning point</b> that made him feel like a <b>man, determined to be free</b>.</li>
+      </ul>`,
+    flash:[
+      {q:"How did Douglass finish learning to read?", a:"By trading bread to poor white boys for reading lessons."},
+      {q:"What happened after he fought back against Mr. Covey?", a:"He was not punished, and Covey never beat him again."}
+    ]},
+  { emoji:"🌟", title:"Harriet Tubman",
+    summary:`<span class="tag">Day 2</span>
+      <p>An enslaved woman who <b>escaped</b>, then <b>returned many times</b> to lead other enslaved people to freedom on the <b>Underground Railroad</b>. She was nicknamed <b>"Moses"</b> and never lost a passenger.</p>`,
+    flash:[
+      {q:"What was Tubman's role on the Underground Railroad?", a:"A conductor — she escaped and returned many times to free others."},
+      {q:"What was her nickname?", a:"“Moses.”"}
+    ]},
+  { emoji:"📖", title:"Harriet Beecher Stowe",
+    summary:`<span class="tag">Day 2</span>
+      <p>She wrote <b><i>Uncle Tom's Cabin</i></b>, an <b>anti-slavery novel</b>. It was hugely popular in the <b>North</b> and <b>infuriated the South</b>.</p>`,
+    flash:[
+      {q:"What book did she write?", a:"Uncle Tom's Cabin."},
+      {q:"How did the South react to it?", a:"They were infuriated/angered by it."}
+    ]},
+  { emoji:"⛓️", title:"The Amistad Case",
+    summary:`<span class="tag">Day 2 &middot; 1841</span>
+      <p>A group of <b>enslaved Africans revolted on a Spanish ship</b> (<i>La Amistad</i>) and took control of it. Their case reached the <b>U.S. Supreme Court</b>, where former president <b>John Quincy Adams</b> defended them.</p>
+      <p>The Court ruled they were <b>freed</b>, and <b>abolitionists raised money to send them home to Africa</b>.</p>`,
+    flash:[
+      {q:"Who defended the Africans in court?", a:"John Quincy Adams (a former president)."},
+      {q:"What was the final ruling?", a:"The Africans were freed."}
+    ]},
+  { emoji:"⚖️", title:"Compromise of 1850 & Fugitive Slave Act",
+    summary:`<span class="tag">Day 3</span>
+      <p>The <b>Compromise of 1850</b> kept the country together: <b>California</b> became a <b>free</b> state, and <b>New Mexico and Utah</b> would <b>vote</b> (popular sovereignty) on slavery.</p>
+      <p>It included a tougher <b>Fugitive Slave Act</b>, which:</p>
+      <ul>
+        <li><b>Made it easier to re-enslave runaways</b>, even in the free North.</li>
+        <li>Let a Black person be <b>sent South by anyone claiming to be their owner</b> (no jury, no testimony).</li>
+        <li><b>Paid commissioners more money for ruling a person enslaved</b> than free.</li>
+        <li><b>Forced Northerners to help</b> catch runaways — which made many of them furious.</li>
+      </ul>`,
+    flash:[
+      {q:"What did the Compromise of 1850 do with California?", a:"Admitted it as a free state (while New Mexico/Utah would vote)."},
+      {q:"Why did the Fugitive Slave Act anger Northerners?", a:"It forced them to help catch runaways and let Black people be sent South on just a claim of ownership."}
+    ]},
+  { emoji:"🩸", title:"Kansas-Nebraska Act",
+    summary:`<span class="tag">Day 3 &middot; 1854</span>
+      <p>Created the <b>Kansas and Nebraska territories</b> and let them use <b>popular sovereignty</b> to decide on slavery. This <b>cancelled the old Missouri Compromise line</b>, so slavery could spread where it had been banned.</p>
+      <p>Pro- and anti-slavery settlers rushed in and <b>fought violently</b> — known as <b>"Bleeding Kansas."</b> The act also <b>led to the creation of the Republican Party</b>.</p>`,
+    flash:[
+      {q:"What violent event did this act cause?", a:"“Bleeding Kansas” (mass violence between settlers)."},
+      {q:"What new political party formed because of it?", a:"The Republican Party."}
+    ]},
+  { emoji:"👨‍⚖️", title:"Dred Scott v. Sandford",
+    summary:`<span class="tag">Day 3 &middot; 1857</span>
+      <p><b>Dred Scott</b>, an enslaved man, <b>sued for his freedom</b> because he had lived in free territory. <b>Chief Justice Roger Taney</b> ruled against him:</p>
+      <ul>
+        <li><b>Black people were not citizens</b> and <b>couldn't sue</b> in court.</li>
+        <li>Taney said African Americans <b>were "inferior"</b> with no rights.</li>
+        <li>The <b>federal government could not ban slavery</b> in the territories (making the Missouri Compromise unconstitutional).</li>
+      </ul>
+      <p>The decision caused <b>outrage in the North</b> and pushed the country closer to war.</p>`,
+    flash:[
+      {q:"What did Taney say about African Americans?", a:"That they were 'inferior' and not citizens, so they couldn't sue."},
+      {q:"How did the North react?", a:"With outrage."}
+    ]},
+  { emoji:"💥", title:"John Brown's Raid",
+    summary:`<span class="tag">Day 4 &middot; Harpers Ferry, 1859</span>
+      <p><b>John Brown</b> was a <b>radical white abolitionist</b> who believed violence was justified to end slavery. He <b>raided a federal arsenal</b> (weapons storehouse) at <b>Harpers Ferry, Virginia</b>, hoping to <b>arm enslaved people and start a revolt</b>.</p>
+      <p>The raid <b>failed</b> — Brown was <b>captured and executed</b>. The <b>North</b> saw him as a <b>martyr (hero)</b>; the <b>South</b> saw him as a <b>terrorist</b>.</p>`,
+    flash:[
+      {q:"What was John Brown trying to do at Harpers Ferry?", a:"Raid an arsenal to arm enslaved people and start a revolt."},
+      {q:"How did the North view him afterward?", a:"As a martyr (a hero who died for the cause)."}
+    ]},
+  { emoji:"🎯", title:"Fort Sumter & the War's Names",
+    summary:`<span class="tag">Day 4 &middot; 1861</span>
+      <p><b>Fort Sumter</b> was a U.S. fort in <b>Charleston, South Carolina</b>, where the <b>South fired the first shots</b> — this <b>started the Civil War</b>.</p>
+      <p>Names for the war include the <b>Civil War</b>, the <b>War Between the States</b>, and the <b>War of Northern Aggression</b> — but <b>NOT</b> "the War to End Slavery."</p>`,
+    flash:[
+      {q:"What happened at Fort Sumter?", a:"The South fired the first shots, starting the Civil War."},
+      {q:"Which is NOT a name for the war: Civil War, War Between the States, or War to End Slavery?", a:"“War to End Slavery.”"}
+    ]}
+];
+
+const QUIZ = [
+  {q:"Which of the following was NOT a name for the Civil War?",
+   o:["War Between the States","War of Northern Aggression","War to End Slavery","Civil War"],c:2,
+   e:"The others were all real names; “War to End Slavery” was not."},
+  {q:"An abolitionist was someone who wanted to:",
+   o:["expand slavery west","end slavery","leave slavery to a vote","return runaways"],c:1,
+   e:"“Abolish” means to get rid of — abolitionists wanted to end slavery."},
+  {q:"Sectionalism means:",
+   o:["focusing on the national good","treating all states equally","each region putting its own interests first","ending slavery"],c:2,
+   e:"It's loyalty to your region (North or South) over the whole country."},
+  {q:"Popular sovereignty meant that:",
+   o:["Congress decides on slavery","the people of a territory vote on slavery","slavery is banned everywhere","the president decides"],c:1,
+   e:"“Popular” = the people of the territory vote."},
+  {q:"Nat Turner's rebellion took place in:",
+   o:["Kansas","South Carolina","Virginia","New Mexico"],c:2,
+   e:"Nat Turner led the violent slave rebellion in Virginia."},
+  {q:"One result of Nat Turner's rebellion was that the South:",
+   o:["freed many enslaved people","passed harsher laws controlling enslaved people","ended slavery","left the Union"],c:1,
+   e:"A frightened South cracked down with harsher laws, including bans on teaching reading."},
+  {q:"Angelina Grimké believed slavery was:",
+   o:["good for business","a sin and un-Christian","none of women's business","only a Northern problem"],c:1,
+   e:"She argued on moral and religious grounds that slavery was a sin."},
+  {q:"Grimké wanted Southern women to act by:",
+   o:["voting","joining the army","signing petitions to the legislatures","moving North"],c:2,
+   e:"She urged women to sign petitions and speak up to the legislatures."},
+  {q:"William Lloyd Garrison is best known for:",
+   o:["leading the Amistad revolt","publishing The Liberator","the Dred Scott decision","raiding Harpers Ferry"],c:1,
+   e:"He published the anti-slavery newspaper The Liberator."},
+  {q:"Who first taught Frederick Douglass the alphabet?",
+   o:["his master","his mistress","his mother","some white boys"],c:1,
+   e:"His mistress began teaching him before her husband made her stop."},
+  {q:"How did Douglass finish learning to read?",
+   o:["he attended school","he traded bread to poor white boys for lessons","his master taught him","he bought books"],c:1,
+   e:"He cleverly traded bread to poor white boys in exchange for reading lessons."},
+  {q:"How did learning to read make Douglass feel at first?",
+   o:["calm and content","frustrated and even suicidal, but hopeful","eager to teach","bored"],c:1,
+   e:"It revealed how wrong slavery was — painful, but it also gave him hope of freedom."},
+  {q:"What happened after Douglass fought back against Mr. Covey?",
+   o:["he was whipped","he was sold","he was NOT punished","he lost and was beaten"],c:2,
+   e:"Covey never beat him again and didn't punish him — he didn't want to ruin his reputation."},
+  {q:"Harriet Beecher Stowe is famous for:",
+   o:["escaping on the Underground Railroad","writing Uncle Tom's Cabin","defending the Amistad Africans","raiding Harpers Ferry"],c:1,
+   e:"Her anti-slavery novel infuriated the South."},
+  {q:"The Amistad case involved:",
+   o:["a slave rebellion in Virginia","a revolt on a Spanish ship","a failed escape to Canada","a plantation fire"],c:1,
+   e:"Enslaved Africans revolted aboard the Spanish ship La Amistad."},
+  {q:"Who defended the Amistad Africans, and what was the ruling?",
+   o:["John Marshall; returned to slavery","John Quincy Adams; they were freed","Roger Taney; executed","Garrison; sent to prison"],c:1,
+   e:"Former president John Quincy Adams defended them; the Court freed them."},
+  {q:"The Compromise of 1850 admitted which state as free?",
+   o:["Kansas","Missouri","California","Nebraska"],c:2,
+   e:"California entered free, while New Mexico and Utah would vote."},
+  {q:"The Fugitive Slave Act:",
+   o:["freed runaways in the North","made it easier to re-enslave runaways","encouraged escapes","made enslaved people citizens"],c:1,
+   e:"It made re-capturing runaways far easier, even in free states."},
+  {q:"Under the Fugitive Slave Act, commissioners earned MORE money for:",
+   o:["freeing people","returning people to enslavers","arresting white helpers","catching runaways themselves"],c:1,
+   e:"They were paid more to rule a person enslaved than to free them."},
+  {q:"The Kansas-Nebraska Act led to:",
+   o:["strengthening the Missouri Compromise","mass violence ('Bleeding Kansas')","the end of voter fraud","John Brown's execution"],c:1,
+   e:"Settlers fought violently over slavery in 'Bleeding Kansas.'"},
+  {q:"Which event led to the formation of the Republican Party?",
+   o:["the Fugitive Slave Act","the Kansas-Nebraska Act","the Amistad case","Fort Sumter"],c:1,
+   e:"Anger over the Kansas-Nebraska Act helped create the anti-slavery Republican Party."},
+  {q:"In the Dred Scott decision, the Court ruled that:",
+   o:["enslaved people could sue","slavery was unconstitutional","the government could NOT ban slavery in the territories","enslaved people were citizens"],c:2,
+   e:"This made the Missouri Compromise unconstitutional — a huge blow to abolitionists."},
+  {q:"Chief Justice Taney said that African Americans:",
+   o:["were protected by the Constitution","were 'inferior' and not citizens","had full rights in the North","could vote"],c:1,
+   e:"He declared them not citizens, so they couldn't even sue in court."},
+  {q:"The reaction to the Dred Scott decision in the North was:",
+   o:["relief","indifference","outrage","celebration"],c:2,
+   e:"Northerners were outraged, pushing the country closer to war."},
+  {q:"John Brown is known for:",
+   o:["running The Liberator","writing anti-slavery novels","raiding an arsenal at Harpers Ferry to start a revolt","defending the Amistad Africans"],c:2,
+   e:"He raided the federal arsenal at Harpers Ferry hoping to arm enslaved people."},
+  {q:"After his raid, John Brown was seen as:",
+   o:["a coward in the South","a hero in the South","a martyr in the North","a friend of slaveholders"],c:2,
+   e:"The North saw him as a martyr; the South saw him as a terrorist."},
+  {q:"Harriet Tubman was:",
+   o:["a Confederate spy","an escaped abolitionist who returned many times to free others","the author of Uncle Tom's Cabin","a Supreme Court justice"],c:1,
+   e:"Nicknamed 'Moses,' she led many enslaved people to freedom."},
+  {q:"The Underground Railroad was:",
+   o:["a system of underground tunnels","a real train line","a secret network of routes and safe houses","a government program"],c:2,
+   e:"It was a secret network of routes, safe houses ('stations') and helpers ('conductors')."},
+  {q:"The first shots of the Civil War were fired at:",
+   o:["Harpers Ferry","Fort Sumter","Bleeding Kansas","the Amistad"],c:1,
+   e:"The South fired first at Fort Sumter in Charleston, South Carolina."}
+];
+
+/* ---------------- STATE ---------------- */
+const app = document.getElementById('app');
+let read = {};
+try { read = JSON.parse(localStorage.getItem('cw_read')||'{}'); } catch(e){ read={}; }
+function saveRead(){ try{ localStorage.setItem('cw_read', JSON.stringify(read)); }catch(e){} }
+
+/* ---------------- GAME: gold, rank, territory ---------------- */
+let gold = 0, earned = {};
+try { gold = parseInt(localStorage.getItem('cw_gold'))||0; } catch(e){ gold=0; }
+try { earned = JSON.parse(localStorage.getItem('cw_earned')||'{}'); } catch(e){ earned={}; }
+function saveGame(){ try{ localStorage.setItem('cw_gold', gold); localStorage.setItem('cw_earned', JSON.stringify(earned)); }catch(e){} }
+
+const GENERAL = "Vaughn";
+const TERRITORIES = ["Fort Sumter","Manassas","New Orleans","Nashville","Vicksburg","Gettysburg","Chattanooga","Atlanta","Savannah","Richmond","Appomattox"];
+const PER = 40; // gold needed to liberate each territory
+function captured(){ return Math.min(TERRITORIES.length, Math.floor(gold/PER)); }
+
+const RANKS = [
+  [0,"Recruit","🎖️"],[80,"Private","🪖"],[160,"Corporal","🎗️"],
+  [260,"Sergeant","⭐"],[360,"Captain","🦅"],[440,"General","🌟"]
+];
+function rankFor(g){ let r=RANKS[0]; RANKS.forEach(x=>{ if(g>=x[0]) r=x; }); return r; }
+
+function renderStats(){
+  const r = rankFor(gold);
+  const el = document.getElementById('stats');
+  if(el) el.innerHTML = `<span class="pill gold">🪙 ${gold} gold</span><span class="pill">${r[2]} ${r[1]} ${GENERAL}</span>`;
+}
+function toast(msg, isTerr){
+  const box = document.getElementById('toasts'); if(!box) return;
+  const d = document.createElement('div');
+  d.className = 'toast'+(isTerr?' terr':'');
+  d.textContent = msg;
+  box.appendChild(d);
+  setTimeout(()=>d.remove(), 2100);
+}
+function addGold(amt, key, label){
+  if(key){ if(earned[key]) return; earned[key]=true; }
+  const before = captured();
+  gold += amt; saveGame(); renderStats();
+  toast(`+${amt} 🪙 ${label||''}`.trim());
+  const after = captured();
+  for(let k=before;k<after;k++){
+    setTimeout(()=>toast(`🔵 Liberated ${TERRITORIES[k]} for the Union!`, true), 500*(k-before+1));
+  }
+}
+function resetGame(){
+  if(!confirm("Start a new campaign? This clears your gold, rank, and progress.")) return;
+  gold=0; earned={}; read={}; saveGame(); saveRead(); renderStats(); home();
+}
+
+/* ---------------- VIEWS ---------------- */
+function home(){
+  renderStats();
+  const done = Object.keys(read).filter(k=>read[k]).length;
+  const pct = Math.round(done/TOPICS.length*100);
+  const cap = captured(), N = TERRITORIES.length;
+  const goal = PER*N;
+  const vpct = Math.round(Math.min(gold,goal)/goal*100);
+  let terrcells = '';
+  TERRITORIES.forEach((t,k)=>{
+    const won = k < cap;
+    terrcells += `<div class="terr ${won?'won':''}"><span class="tflag">${won?'🔵':'⚪'}</span>${t}</div>`;
+  });
+  let html = `
+    <div class="card campaign">
+      <h3>🇺🇸 General ${GENERAL}'s March to Victory</h3>
+      <p class="sub">Earn gold by studying &amp; quizzing. Every ${PER} gold liberates a territory for the Union!</p>
+      <div class="vbar"><div class="vfill" style="width:${vpct}%"></div><span class="vflag" style="left:${vpct}%">🚩</span></div>
+      <div class="vlabel">${cap} of ${N} territories liberated</div>
+      <div class="terrgrid">${terrcells}</div>
+      ${cap>=N?`<div class="victory">🎉 The Union is restored — you won the war, General ${GENERAL}!</div>`:''}
+    </div>
+    <div class="barlabel">📖 ${done} of ${TOPICS.length} topics studied</div>
+    <div class="bar"><div style="width:${pct}%"></div></div>
+    <div class="card" style="text-align:center">
+      <p style="margin:0 0 10px">Read each topic and answer its 2 flash questions, then take the final quiz to win the war.</p>
+      <button class="btn gold block" onclick="startQuiz()">📝 Take the Final Quiz</button>
+    </div>
+    <h3 style="margin:18px 0 6px;color:var(--navy)">Topics</h3>`;
+  TOPICS.forEach((t,i)=>{
+    html += `<div class="card topiccard" onclick="topic(${i})">
+      <div class="emoji">${t.emoji}</div>
+      <div class="t"><h3>${t.title}</h3><span>Tap to read &amp; check</span></div>
+      <div class="check ${read[i]?'':'todo'}">${read[i]?'✓':'○'}</div>
+    </div>`;
+  });
+  html += `<span class="resetlink" onclick="resetGame()">↺ Start a new campaign (reset progress)</span>`;
+  app.innerHTML = html; window.scrollTo(0,0);
+}
+
+// PAGE 1: read the terms only
+function topic(i){
+  const t = TOPICS[i];
+  let html = `<div class="card summary"><h2>${t.emoji} ${t.title}</h2>${t.summary}</div>
+    <p style="text-align:center;color:#718096;font-size:14px;margin:14px 0 0">Read it through — then test yourself with the page closed. 👇</p>
+    <div class="navrow">
+      <button class="btn ghost" onclick="home()">← All topics</button>
+      <button class="btn gold" onclick="check(${i})">✋ Quick Check →</button>
+    </div>`;
+  app.innerHTML = html; window.scrollTo(0,0);
+  addGold(10, 'read'+i, 'Studied a topic!');
+}
+
+// PAGE 2: the flash questions, WITHOUT the summary visible
+function check(i){
+  const t = TOPICS[i];
+  let html = `<div class="card summary"><span class="tag">Quick Check</span>
+      <h2 style="margin-top:4px">${t.emoji} ${t.title}</h2>
+      <p style="color:#718096;font-size:14px;margin:0">Type your answer from memory, then tap to check.</p></div>`;
+  t.flash.forEach((f,j)=>{
+    html += `<div class="flash">
+      <div class="qlabel">Flash ${j+1}</div>
+      <div class="q">${f.q}</div>
+      <input class="flashin" type="text" placeholder="Type your answer…" autocomplete="off">
+      <button class="reveal" onclick="revealAns(this)">Show answer</button>
+      <div class="ans">✓ ${f.a}</div>
+    </div>`;
+  });
+  html += `<div class="navrow">
+      <button class="btn ghost" onclick="topic(${i})">← Re-read</button>`;
+  if(i < TOPICS.length-1)
+    html += `<button class="btn primary" onclick="markRead(${i});topic(${i+1})">Next topic →</button>`;
+  else
+    html += `<button class="btn gold" onclick="markRead(${i});home()">Done ✓</button>`;
+  html += `</div>`;
+  app.innerHTML = html; window.scrollTo(0,0);
+  markRead(i);
+}
+function markRead(i){ read[i]=true; saveRead(); }
+
+function revealAns(btn){
+  const card = btn.closest('.flash');
+  card.querySelector('.flashin').setAttribute('readonly','');
+  card.querySelector('.ans').classList.add('show');
+  btn.style.display='none';
+}
+
+/* ---------- QUIZ ---------- */
+let qi=0, answers=[];
+function startQuiz(){ qi=0; answers=[]; question(); }
+function question(){
+  const item = QUIZ[qi];
+  let html = `<div class="card">
+    <div class="qcount">Question ${qi+1} of ${QUIZ.length}</div>
+    <div class="bar"><div style="width:${Math.round(qi/QUIZ.length*100)}%"></div></div>
+    <div class="qtext">${item.q}</div>`;
+  item.o.forEach((opt,k)=>{
+    html += `<button class="opt" onclick="answer(${k})">${opt}</button>`;
+  });
+  html += `<div class="explain"></div>
+    <button class="btn primary block hidden" id="nextbtn" onclick="next()">${qi<QUIZ.length-1?'Next →':'See my score 🎉'}</button>
+    <button class="btn ghost block" style="margin-top:14px" onclick="home()">Quit to topics</button>
+  </div>`;
+  app.innerHTML = html; window.scrollTo(0,0);
+}
+function answer(k){
+  const item = QUIZ[qi];
+  if(answers[qi]!==undefined) return;
+  answers[qi]=k;
+  const opts = app.querySelectorAll('.opt');
+  opts.forEach((b,idx)=>{
+    b.classList.add('disabled'); b.onclick=null;
+    if(idx===item.c) b.classList.add('correct');
+    if(idx===k && k!==item.c) b.classList.add('wrong');
+  });
+  const ex = app.querySelector('.explain');
+  ex.innerHTML = (k===item.c?'✅ <b>Correct!</b> ':'❌ <b>Not quite.</b> ')+item.e;
+  ex.classList.add('show');
+  if(k===item.c) addGold(10, 'quiz'+qi, 'Correct!');
+  app.querySelector('#nextbtn').classList.remove('hidden');
+}
+function next(){ if(qi<QUIZ.length-1){qi++;question();} else results(); }
+function results(){
+  let score=0; answers.forEach((a,i)=>{ if(a===QUIZ[i].c) score++; });
+  if(score===QUIZ.length) addGold(100, 'perfect', 'PERFECT QUIZ BONUS!');
+  const pct = Math.round(score/QUIZ.length*100);
+  let msg, color;
+  if(pct>=90){msg="Amazing! You're test-ready! 🏆";color="var(--green)";}
+  else if(pct>=75){msg="Great job — almost there! 💪";color="var(--green)";}
+  else if(pct>=60){msg="Good start — review the misses below. 📖";color="var(--gold)";}
+  else{msg="Keep studying — you've got this! Review below. 📚";color="var(--red)";}
+  let html = `<div class="card scorebox">
+      <div class="big" style="color:${color}">${score}/${QUIZ.length}</div>
+      <div class="msg">${msg}</div>
+      <button class="btn gold" onclick="startQuiz()">↻ Retake quiz</button>
+      <button class="btn ghost block" onclick="home()">Back to topics</button>
+    </div>
+    <div class="card review"><h4>Review your answers</h4>`;
+  QUIZ.forEach((item,i)=>{
+    const a=answers[i], ok=a===item.c;
+    html += `<div class="ritem ${ok?'ok':'no'}">
+      <span class="icon">${ok?'✅':'❌'}</span>${item.q}<br>
+      <b>Answer:</b> ${item.o[item.c]}${!ok?`<br><span style="color:var(--red)">You chose: ${item.o[a]}</span>`:''}
+      <br><span style="color:#4a5568">${item.e}</span>
+    </div>`;
+  });
+  html += `</div>`;
+  app.innerHTML = html; window.scrollTo(0,0);
+}
+
+home();
+</script>
+</body>
+</html>
