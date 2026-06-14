@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ESS Regents Study App</title>
+<style>
+  :root{ --teal:#0f5e54; --teal2:#137a6d; --amber:#c2711c; --green:#2f855a; --red:#c53030; --paper:#fff; --ink:#16302b; --line:#d9e2df; --soft:#eef4f2; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(160deg,#f3f8f6,#e4eeeb);color:var(--ink);line-height:1.5}
+  .topbar{position:sticky;top:0;z-index:50}
+  header{background:var(--teal);color:#fff;padding:16px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+  header h1{margin:0;font-size:19px;letter-spacing:.3px}
+  header p{margin:4px 0 0;font-size:13px;opacity:.9}
+  .stats{display:flex;justify-content:center;gap:10px;background:#0b463e;padding:8px 10px;border-top:1px solid #1d6b60}
+  .stats .pill{background:rgba(255,255,255,.12);color:#fff;border-radius:99px;padding:5px 13px;font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+  .stats .pill.xp{background:rgba(194,113,28,.3);color:#ffd9a8}
+  .card.journey{background:#0f5e54;background:linear-gradient(135deg,#0f5e54,#137a6d);color:#fff;border:none}
+  .journey h3{margin:0 0 4px;color:#fff;font-size:17px}
+  .journey .sub{font-size:13px;opacity:.9;margin:0 0 12px}
+  .vbar{position:relative;height:16px;background:#9fb7b1;border-radius:99px;overflow:visible;margin:18px 0 8px}
+  .vfill{height:100%;background:linear-gradient(90deg,#3fa796,#7fd0c1);border-radius:99px;transition:width .6s}
+  .vflag{position:absolute;top:-13px;transform:translateX(-50%);font-size:22px;transition:left .6s;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
+  .vlabel{text-align:center;font-weight:700;font-size:15px;margin-bottom:12px}
+  .terrgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:7px}
+  .terr{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:7px 5px;text-align:center;font-size:11px;opacity:.65;transition:.3s}
+  .terr.won{background:rgba(127,208,193,.4);border-color:#9fe0d4;opacity:1;font-weight:700}
+  .terr .tflag{font-size:18px;display:block;margin-bottom:2px}
+  .victory{margin-top:14px;background:var(--amber);color:#fff;border-radius:12px;padding:12px;text-align:center;font-weight:800;font-size:16px}
+  .resetlink{display:block;text-align:center;color:#8aa39d;font-size:12px;margin-top:14px;cursor:pointer;text-decoration:underline}
+  #toasts{position:fixed;left:0;right:0;bottom:24px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:100}
+  .toast{background:var(--teal);color:#ffd9a8;font-weight:800;padding:10px 18px;border-radius:99px;box-shadow:0 4px 14px rgba(0,0,0,.3);font-size:15px;animation:tp .4s ease,tf .4s ease 1.6s forwards}
+  .toast.terr{background:var(--amber);color:#fff}
+  @keyframes tp{from{opacity:0;transform:translateY(18px) scale(.9)}to{opacity:1;transform:none}}
+  @keyframes tf{to{opacity:0;transform:translateY(-10px)}}
+  .wrap{max-width:760px;margin:0 auto;padding:16px}
+  .bar{height:8px;background:var(--soft);border-radius:99px;overflow:hidden;margin:10px 0 4px}
+  .bar>div{height:100%;width:0;background:linear-gradient(90deg,var(--amber),#e0a155);transition:.4s}
+  .barlabel{font-size:12px;color:#5a6b66;text-align:center;margin-bottom:6px}
+  .btn{display:inline-block;border:none;cursor:pointer;font-size:16px;font-weight:600;border-radius:12px;padding:13px 18px;transition:transform .08s,box-shadow .2s}
+  .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--teal2);color:#fff;box-shadow:0 3px 8px rgba(19,122,109,.3)}
+  .btn.gold{background:var(--amber);color:#fff;box-shadow:0 3px 8px rgba(194,113,28,.35)}
+  .btn.ghost{background:#fff;color:var(--teal2);border:2px solid var(--teal2)}
+  .btn.block{display:block;width:100%;margin-top:10px;text-align:center}
+  .card{background:var(--paper);border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid var(--line)}
+  .secttitle{margin:18px 0 6px;color:var(--teal)}
+  .daycard{cursor:pointer;display:flex;align-items:center;gap:14px}
+  .daycard .dnum{flex-shrink:0;width:46px;height:46px;border-radius:12px;background:var(--teal2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
+  .daycard .dbody{flex:1}
+  .daycard .dbody h3{margin:0;font-size:15.5px}
+  .daycard .dbody .dmeta{font-size:12px;color:#718096}
+  .daycard .chev{color:#cbd5e0;font-size:22px}
+  .ultimate{background:#fbf2e6;border:2px solid var(--amber)}
+  .ultimate h3{color:var(--amber);margin:0}
+  .topiccard{display:flex;align-items:center;gap:14px;cursor:pointer}
+  .topiccard .emoji{font-size:26px;flex-shrink:0}
+  .topiccard .t{flex:1}
+  .topiccard .t h3{margin:0;font-size:15px}
+  .topiccard .t span{font-size:12px;color:#718096}
+  .check{font-size:20px;color:var(--green)}
+  .check.todo{color:#cbd5e0}
+  .summary{font-size:16px}
+  .summary h2{color:var(--teal);margin-top:0;font-size:19px}
+  .summary ul{padding-left:20px} .summary li{margin:6px 0}
+  .tag{display:inline-block;background:var(--soft);color:var(--teal2);font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+  .flash{background:#fbf7ee;border:1px solid #ecdcbf;border-radius:14px;padding:14px;margin:12px 0}
+  .flash .q{font-weight:600}
+  .flash .qlabel{color:var(--amber);font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .ans{margin-top:10px;background:#e9f6ee;border:1px solid #b7e0c6;color:#22543d;border-radius:10px;padding:10px;display:none;font-weight:600}
+  .ans.show{display:block;animation:pop .25s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .flashin{display:block;width:100%;margin-top:10px;padding:11px 13px;font-size:15px;border:2px solid var(--line);border-radius:10px;outline:none;font-family:inherit}
+  .flashin:focus{border-color:var(--teal2)} .flashin[readonly]{background:#f7fafc;color:#4a5568}
+  .reveal{margin-top:10px;background:#fff;border:2px solid var(--amber);color:#9c6f0e;font-weight:700;border-radius:10px;padding:9px 14px;cursor:pointer;font-size:14px}
+  .navrow{display:flex;gap:10px;margin-top:18px} .navrow .btn{flex:1}
+  .qcount{font-size:13px;color:#718096;text-align:center;margin-bottom:6px}
+  .qtext{font-size:18px;font-weight:700;color:var(--teal);margin-bottom:14px}
+  .opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:12px;padding:13px 15px;margin:9px 0;font-size:15px;cursor:pointer;transition:.15s}
+  .opt:hover{border-color:var(--teal2)}
+  .opt.correct{background:#e9f6ee;border-color:var(--green);color:#22543d;font-weight:700}
+  .opt.wrong{background:#fdecec;border-color:var(--red);color:#742a2a}
+  .opt.disabled{cursor:default}
+  .explain{margin-top:12px;background:var(--soft);border-radius:12px;padding:12px;font-size:14px;display:none}
+  .explain.show{display:block} .explain b{color:var(--teal)}
+  .scorebox{text-align:center;padding:10px}
+  .scorebox .big{font-size:54px;font-weight:800;color:var(--teal)}
+  .scorebox .msg{font-size:18px;margin:6px 0 16px;font-weight:600}
+  .review h4{margin:18px 0 6px;color:var(--teal)}
+  .ritem{font-size:14px;padding:10px;border-radius:10px;margin:6px 0;border:1px solid var(--line)}
+  .ritem.ok{background:#f0faf4} .ritem.no{background:#fdf2f2} .ritem .icon{font-weight:800;margin-right:6px}
+  footer{text-align:center;font-size:12px;color:#9fb0ab;padding:20px}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <header>
+    <h1>🌍 ESS Regents: Journey to Mastery</h1>
+    <p>Study your way from Earth's core to the edge of the cosmos!</p>
+  </header>
+  <div id="stats" class="stats"></div>
+</div>
+<div class="wrap" id="app"></div>
+<footer>Earth &amp; Space Science Regents study app • Read · Check · Quiz</footer>
+<div id="toasts"></div>
+<script>
+/* ===================== CONTENT ===================== */
+const UNITS = [
+ { n:1, title:"Earth's Systems & Spheres", topics:[
+   {emoji:"🌐", title:"The Four Spheres", summary:`<span class="tag">Unit 1</span>
+     <p>Earth is one connected, ever-changing system made of four interacting <b>spheres</b>:</p>
+     <ul><li><b>Geosphere</b> — the solid Earth (rocks, minerals, landforms, interior).</li>
+     <li><b>Atmosphere</b> — the gases around Earth; the lowest layer, the <b>troposphere</b>, is where weather happens.</li>
+     <li><b>Hydrosphere</b> — all of Earth's water.</li>
+     <li><b>Biosphere</b> — all living things.</li></ul>
+     <p>When two spheres shape each other over time, that's <b>coevolution</b> (early life made oxygen that changed the air). The natural events shaping the geosphere are <b>geologic processes</b>.</p>`,
+     flash:[{q:`Which layer of the atmosphere has our weather?`,a:`The troposphere (the lowest layer).`},
+            {q:`What is coevolution?`,a:`When two or more spheres influence each other's change over time.`}]},
+   {emoji:"🔁", title:"Feedback & Scale Vocabulary", summary:`<span class="tag">Unit 1</span>
+     <p>A <b>feedback</b> is when a system's output loops back to affect the system:</p>
+     <ul><li><b>Positive feedback amplifies change</b> — melting ice → less reflection (lower albedo) → more warming → more melting.</li>
+     <li><b>Negative feedback stabilizes</b> — more warming → more clouds → more sunlight reflected → cooling.</li></ul>
+     <p>Use scale words precisely: <b>spatial range</b> = the area something covers; <b>spatial scale</b> = local vs. global; <b>temporal range</b> = how long something exists; <b>temporal change</b> = change over time. <b>Dynamic</b> = always changing.</p>`,
+     flash:[{q:`Melting ice → less reflection → more melting. Which type of feedback?`,a:`Positive feedback (it amplifies the change).`},
+            {q:`Spatial scale vs. spatial range?`,a:`Scale = the size of area studied (local/global); range = the actual area something covers.`}]}
+ ]},
+ { n:2, title:"Rocks & Minerals", topics:[
+   {emoji:"💎", title:"Minerals", summary:`<span class="tag">Unit 2</span>
+     <p>A <b>mineral</b> is <b>naturally occurring, inorganic, solid</b>, with a <b>definite chemical composition</b> and a <b>crystalline structure</b>. Minerals are the building blocks of rocks.</p>
+     <p>They're identified by physical <b>properties</b>: color, <b>streak</b> (powder color), <b>luster</b>, <b>hardness</b>, <b>cleavage</b>, and density. (ESSRT p.16–17 has the ID flowchart.)</p>`,
+     flash:[{q:`Name three things that make something a mineral.`,a:`Any of: naturally occurring, inorganic, solid, definite chemical composition, crystalline.`},
+            {q:`What is "streak"?`,a:`The color of a mineral's powder — a property used to identify it.`}]},
+   {emoji:"🪨", title:"The Rock Cycle", summary:`<span class="tag">Unit 2</span>
+     <ul><li><b>Igneous</b> — cooled magma/lava. Slow cooling underground (intrusive) → <b>large crystals</b>; fast cooling at surface (extrusive) → fine/glassy.</li>
+     <li><b>Sedimentary</b> — compaction &amp; cementation of sediment; often <b>layered</b>, may hold <b>fossils</b>.</li>
+     <li><b>Metamorphic</b> — existing rock changed by <b>heat &amp; pressure</b> (marble from limestone).</li></ul>
+     <p>The cycle is continuous with <b>no starting point</b> — any rock can become any other. <b>Bowen's Reaction Series</b> (ESSRT p.13) shows the order minerals crystallize from magma.</p>`,
+     flash:[{q:`Igneous rock with large crystals — fast or slow cooling, and where?`,a:`Slow cooling, deep underground (intrusive).`},
+            {q:`Which rock type is layered and may contain fossils?`,a:`Sedimentary rock.`}]}
+ ]},
+ { n:3, title:"Plate Tectonics", topics:[
+   {emoji:"🌋", title:"Earth's Interior & Convection", summary:`<span class="tag">Unit 3</span>
+     <p>Earth's layers (outside in): <b>crust</b>, <b>solid mantle</b>, <b>liquid outer core</b>, <b>solid inner core</b>. The <b>lithosphere</b> (crust + upper mantle) is broken into <b>tectonic plates</b>.</p>
+     <p>Plates move by <b>thermal convection</b> in the mantle — heat (largely from <b>radioactive decay</b> of uranium, thorium, potassium) makes material rise while gravity pulls denser material down.</p>`,
+     flash:[{q:`What are Earth's four interior layers, outside in?`,a:`Crust, solid mantle, liquid outer core, solid inner core.`},
+            {q:`What drives plate motion, and where does the heat come from?`,a:`Thermal convection in the mantle; heat from radioactive decay inside Earth.`}]},
+   {emoji:"🗺️", title:"Plate Boundaries & Evidence", summary:`<span class="tag">Unit 3</span>
+     <ul><li><b>Divergent</b> — plates move apart; new crust forms (sea-floor spreading).</li>
+     <li><b>Convergent</b> — plates collide; mountains, volcanoes, trenches.</li>
+     <li><b>Transform</b> — plates slide past each other; earthquakes.</li></ul>
+     <p><b>Hotspots</b> make volcanoes away from boundaries (Hawaii). Evidence for tectonics: <b>paleomagnetism</b>, matching continent shapes, and identical <b>fossils on now-separated continents</b>.</p>`,
+     flash:[{q:`At which boundary does new ocean crust form by sea-floor spreading?`,a:`A divergent boundary.`},
+            {q:`Name one piece of evidence for plate tectonics.`,a:`Paleomagnetism, matching coastlines, or matching fossils on separated continents.`}]},
+   {emoji:"📳", title:"Earthquakes & Seismic Waves", summary:`<span class="tag">Unit 3</span>
+     <ul><li><b>P-waves</b> — fastest; travel through solids, liquids, and gases.</li>
+     <li><b>S-waves</b> — slower; travel <b>only through solids</b>.</li>
+     <li><b>Surface waves</b> (Love &amp; Rayleigh) — slowest but cause the <b>most damage</b>.</li></ul>
+     <p>The <b>epicenter</b> is the surface point above the focus. <b>Magnitude</b> = energy released; <b>intensity</b> = shaking. <b>Tsunamis</b> are giant waves from undersea quakes — fast in deep water, tall near shore.</p>`,
+     flash:[{q:`Which seismic wave is fastest and travels through liquids?`,a:`The P-wave (primary wave).`},
+            {q:`What's the epicenter?`,a:`The point on Earth's surface directly above the earthquake's focus.`}]}
+ ]},
+ { n:4, title:"Water & Earth's Surface", topics:[
+   {emoji:"💧", title:"Water's Special Properties", summary:`<span class="tag">Unit 4</span>
+     <p>Liquid water drives Earth's surface processes because it can:</p>
+     <ul><li>absorb, store &amp; release lots of <b>energy</b> (moderates climate),</li>
+     <li><b>transmit sunlight</b>,</li><li><b>expand when it freezes</b> (ice floats &amp; cracks rock),</li>
+     <li><b>dissolve and transport</b> materials (the "universal solvent").</li></ul>`,
+     flash:[{q:`Why does freezing water crack rocks?`,a:`Water expands when it freezes, prying cracks apart (frost wedging).`},
+            {q:`Why is water called the "universal solvent"?`,a:`It dissolves and transports many materials.`}]},
+   {emoji:"⛰️", title:"Weathering, Erosion & Deposition", summary:`<span class="tag">Unit 4</span>
+     <p><b>Mechanical weathering</b> breaks rock without changing it: <b>frost wedging</b>, <b>abrasion</b>. <b>Chemical weathering</b> changes its chemistry: <b>oxidation</b> (rust), <b>hydrolysis</b>, <b>carbonation</b>, <b>dissolution</b>.</p>
+     <p><b>Erosion</b> transports sediment (rivers, glaciers, wind, waves); <b>deposition</b> drops it, building deltas and beaches. Glaciers carve <b>U-shaped valleys</b>.</p>`,
+     flash:[{q:`Is rusting (oxidation) mechanical or chemical weathering?`,a:`Chemical weathering.`},
+            {q:`What's the difference between weathering and erosion?`,a:`Weathering breaks rock down in place; erosion transports the pieces away.`}]},
+   {emoji:"🚰", title:"Groundwater", summary:`<span class="tag">Unit 4</span>
+     <p>Rain either soaks in (<b>infiltration</b>) or flows off (<b>runoff</b>); some returns to air via <b>evapotranspiration</b>. The <b>water table</b> separates the dry zone above from the saturated groundwater zone below.</p>
+     <ul><li><b>Porosity</b> — open space to <i>hold</i> water.</li><li><b>Permeability</b> — how easily water <i>flows through</i>.</li></ul>`,
+     flash:[{q:`Porosity vs. permeability?`,a:`Porosity = space to hold water; permeability = how easily water flows through it.`},
+            {q:`What is the water table?`,a:`The boundary between the unsaturated zone and the saturated (groundwater) zone.`}]}
+ ]},
+ { n:5, title:"Earth's History & Dating", topics:[
+   {emoji:"⏳", title:"Radiometric Dating", summary:`<span class="tag">Unit 5</span>
+     <p>Unstable atoms decay at a steady rate (<b>exponential decay</b>). The time for half a sample to decay is its <b>half-life</b>. Scientists use known half-lives (ESSRT p.15) for <b>radiometric dating</b> of rocks and fossils. Earth is about <b>4.6 billion years</b> old.</p>
+     <p>The <b>oldest minerals on Earth, the Moon, and Mars are about the same age</b> — strong evidence they all formed together.</p>`,
+     flash:[{q:`What is a half-life?`,a:`The time it takes for half of a radioactive sample to decay.`},
+            {q:`About how old are Earth and the solar system?`,a:`About 4.6 billion years.`}]},
+   {emoji:"🪐", title:"Forming the Solar System", summary:`<span class="tag">Unit 5</span>
+     <p>~4.6 bya a <b>solar nebula</b> (gas &amp; dust) collapsed and spun, forming the Sun and a disk. Particles stuck together by <b>accretion</b> into <b>planetesimals</b> → planets. The <b>Late Heavy Bombardment</b> then cratered the young planets.</p>
+     <p>Earth's oldest rocks were destroyed by plate tectonics and erosion, so we study the <b>Moon, asteroids, and meteorites</b> (barely changed) to learn about early Earth.</p>`,
+     flash:[{q:`What is accretion?`,a:`The clumping-together of dust and gas that built planetesimals and planets.`},
+            {q:`Why study Moon rocks and meteorites to learn about early Earth?`,a:`They've changed little in billions of years, while Earth's oldest rocks were destroyed.`}]},
+   {emoji:"🦠", title:"Coevolution & Mass Extinctions", summary:`<span class="tag">Unit 5</span>
+     <p>Life remade the planet: <b>cyanobacteria</b> began <b>photosynthesis</b> (~3.5 bya), making oxygen → <b>Banded Iron Formations</b> → the <b>Great Oxidation Event</b> (~2.4 bya) → eukaryotes → multicellular life → the <b>Cambrian Explosion</b> → land life → mammals → hominins.</p>
+     <p><b>Mass extinctions</b> (asteroid impacts, huge volcanic eruptions, climate change) repeatedly wiped out species and let new groups rise.</p>`,
+     flash:[{q:`What process let early life add oxygen to the atmosphere?`,a:`Photosynthesis by cyanobacteria.`},
+            {q:`Name a cause of mass extinctions.`,a:`Asteroid impacts, massive volcanic eruptions, or rapid climate change.`}]}
+ ]},
+ { n:6, title:"Earth, Moon & Sun", topics:[
+   {emoji:"🌎", title:"Earth's Motions", summary:`<span class="tag">Unit 6</span>
+     <p><b>Rotation</b> (spin, ~24 h) causes <b>day &amp; night</b> and the Sun's apparent east-to-west path. Proofs: <b>star trails</b>, the <b>Foucault pendulum</b>, and the <b>Coriolis effect</b>. <b>Revolution</b> (orbit, ~365 d) gives us the year.</p>`,
+     flash:[{q:`What causes day and night?`,a:`Earth's rotation on its axis.`},
+            {q:`Name one proof of Earth's rotation.`,a:`Star trails, the Foucault pendulum, or the Coriolis effect.`}]},
+   {emoji:"🌙", title:"Phases & Eclipses", summary:`<span class="tag">Unit 6</span>
+     <p>The Moon's <b>phases</b> come from the changing Earth-Moon-Sun positions over a ~<b>29.5-day</b> cycle (new → crescent → quarter → gibbous → full …).</p>
+     <p>Eclipses need alignment: a <b>solar eclipse</b> happens at a <b>new Moon</b>; a <b>lunar eclipse</b> happens at a <b>full Moon</b>.</p>`,
+     flash:[{q:`A lunar eclipse can only happen during which phase?`,a:`A full Moon.`},
+            {q:`About how long is the Moon's phase cycle?`,a:`About 29.5 days.`}]},
+   {emoji:"🌊", title:"Tides & Seasons", summary:`<span class="tag">Unit 6</span>
+     <p><b>Tides</b> are caused mainly by the <b>Moon's gravity</b>. <b>Spring tides</b> (biggest range) happen when Sun-Moon-Earth are <b>aligned</b> (new/full Moon); <b>neap tides</b> (smallest) when they're at <b>right angles</b> (quarter Moons).</p>
+     <p><b>Seasons</b> are caused by Earth's <b>23.5° axial tilt</b> — <b>not</b> its distance from the Sun. The hemisphere tilted toward the Sun gets more direct light = summer.</p>`,
+     flash:[{q:`What really causes the seasons?`,a:`The 23.5° tilt of Earth's axis (not distance from the Sun).`},
+            {q:`When do spring tides (largest range) occur?`,a:`When the Sun, Moon, and Earth are aligned — at new or full Moon.`}]}
+ ]},
+ { n:7, title:"Stars & the Universe", topics:[
+   {emoji:"☀️", title:"Fusion, Spectra & Elements", summary:`<span class="tag">Unit 7</span>
+     <p>Stars shine by <b>nuclear fusion</b> (hydrogen → helium; lost mass → energy). A star's <b>initial mass</b> determines its life and lifespan. Elements form <b>up to iron</b> in normal stars; <b>heavier than iron</b> only in <b>supernovae</b>.</p>
+     <p>Each element emits/absorbs <b>characteristic wavelengths</b>, so a star's <b>spectrum</b> reveals what it's made of and how it moves.</p>`,
+     flash:[{q:`How do stars produce energy?`,a:`Nuclear fusion of hydrogen into helium (lost mass becomes energy).`},
+            {q:`Where are elements heavier than iron made?`,a:`In supernova explosions of massive stars.`}]},
+   {emoji:"🔭", title:"H-R Diagram & Star Life Cycles", summary:`<span class="tag">Unit 7</span>
+     <p>The <b>H-R diagram</b> (ESSRT p.4) plots <b>temperature</b> vs. <b>brightness</b>. Groups: main sequence, giants, supergiants, white dwarfs. <b>Lower (or negative) absolute magnitude = brighter</b> star. Temperature sets color (blue hot, red cool).</p>
+     <p>The <b>Sun</b> is a main-sequence star. Its layers (in→out): core → radiative zone → convective zone → photosphere → chromosphere → corona.</p>`,
+     flash:[{q:`On the H-R diagram, what is the Sun classified as?`,a:`A main-sequence star.`},
+            {q:`A star with a lower (more negative) absolute magnitude is…?`,a:`Brighter.`}]},
+   {emoji:"💥", title:"Solar System & the Big Bang", summary:`<span class="tag">Unit 7</span>
+     <p>The solar system is <b>heliocentric</b>, inside the <b>Milky Way</b>. The <b>transit method</b> finds exoplanets (a planet dims its star's light). <b>Kepler's laws</b>: orbits are ellipses; planets move faster when closer to the Sun; farther planets take longer.</p>
+     <p>The <b>Big Bang</b> is supported by <b>redshift</b> (distant galaxies move away faster — universe is expanding) and the <b>cosmic microwave background</b>.</p>`,
+     flash:[{q:`What does redshift of distant galaxies tell us?`,a:`The universe is expanding (galaxies are moving away; farther = faster).`},
+            {q:`By Kepler's laws, when does a planet move fastest?`,a:`When it is closest to the Sun (perihelion).`}]}
+ ]},
+ { n:8, title:"Weather & Climate", topics:[
+   {emoji:"🌦️", title:"Weather: Pressure, Fronts & Air Masses", summary:`<span class="tag">Unit 8</span>
+     <p>Air pressure <b>drops</b> when air is <b>warm</b>, <b>humid</b> (water vapor is lighter than dry air), or at <b>high altitude</b>. <b>Wind blows high → low</b> pressure.</p>
+     <ul><li><b>Cold front</b> → thunderstorms, heavy rain.</li><li><b>Warm front</b> → steady rain/snow.</li>
+     <li><b>Stationary</b> → lingering clouds/rain.</li><li><b>Occluded</b> → cold front overtakes warm → complex storms.</li></ul>
+     <p><b>Dew point</b> = temperature where air saturates; when it equals air temp, rain is likely.</p>`,
+     flash:[{q:`Which way does wind blow between pressure areas?`,a:`From high pressure to low pressure.`},
+            {q:`What weather does a cold front bring?`,a:`Thunderstorms and heavy rain.`}]},
+   {emoji:"🌀", title:"Storms & Weather Maps", summary:`<span class="tag">Unit 8</span>
+     <p><b>Station models</b> pack temperature, pressure, wind, and sky into one symbol (ESSRT p.8 key). <b>Isobars</b> connect equal-pressure points — <b>closely spaced isobars = strong winds</b>.</p>
+     <p><b>Hurricanes</b> form over <b>warm ocean water</b> and spin <b>counterclockwise in the Northern Hemisphere</b>. <b>Tornadoes</b> form from severe thunderstorms.</p>`,
+     flash:[{q:`What do closely spaced isobars indicate?`,a:`Strong winds (a steep pressure gradient).`},
+            {q:`Hurricanes form over what, and spin which way in the N. Hemisphere?`,a:`Over warm ocean water; counterclockwise.`}]},
+   {emoji:"🌡️", title:"Climate & Human Activity", summary:`<span class="tag">Unit 8</span>
+     <p><b>Albedo</b> = reflectivity (ice reflects, dark ocean absorbs). <b>Ocean currents</b> move heat: the wind-driven <b>Gulf Stream</b> and the temperature/salinity-driven <b>thermohaline circulation (AMOC)</b>. Slow <b>Milankovitch cycles</b> (orbit/tilt) drive ice ages.</p>
+     <p>Humans burning <b>fossil fuels</b> raise CO₂, warming the planet. Issues: <b>ocean acidification</b>, <b>saltwater intrusion</b>, <b>urban heat islands</b>. Solutions weigh cost, safety &amp; environment (e.g., Project Drawdown).</p>`,
+     flash:[{q:`What is albedo?`,a:`How reflective a surface is — ice/clouds (high) reflect sunlight; dark surfaces (low) absorb it.`},
+            {q:`What human activity is the main cause of rising CO₂?`,a:`Burning fossil fuels.`}]}
+ ]}
+];
+
+const QUESTIONS = [
+ // Unit 1
+ {u:1,id:'u1a',q:`Which layer of the atmosphere contains our weather?`,o:[`stratosphere`,`troposphere`,`mesosphere`,`thermosphere`],c:1,e:`The troposphere is the lowest layer, where we live and where weather happens.`},
+ {u:1,id:'u1b',q:`Melting ice lowers Earth's albedo, leading to more warming. This is:`,o:[`negative feedback`,`positive feedback`,`the Coriolis effect`,`conduction`],c:1,e:`Positive feedback amplifies the original change.`},
+ {u:1,id:'u1c',q:`When two spheres shape each other's change over time, it is called:`,o:[`erosion`,`coevolution`,`convection`,`accretion`],c:1,e:`Example: life produced oxygen that changed the atmosphere.`},
+ {u:1,id:'u1d',q:`Which is the solid part of Earth — rocks, minerals, and the interior?`,o:[`hydrosphere`,`biosphere`,`geosphere`,`atmosphere`],c:2,e:`The geosphere is the solid Earth.`},
+ {u:1,id:'u1e',q:`"The size of the area being studied (local vs. global)" describes:`,o:[`spatial scale`,`temporal range`,`albedo`,`eccentricity`],c:0,e:`Spatial scale = the size of the area; temporal terms refer to time.`},
+ {u:1,id:'u1f',q:`More warming → more clouds → more sunlight reflected → cooling. This is:`,o:[`positive feedback`,`negative feedback`,`weathering`,`a hotspot`],c:1,e:`Negative feedback reduces (stabilizes) the change.`},
+ // Unit 2
+ {u:2,id:'u2a',q:`An igneous rock with very large crystals most likely cooled:`,o:[`quickly at the surface`,`slowly deep underground`,`instantly in water`,`during weathering`],c:1,e:`Slow cooling underground gives crystals time to grow large.`},
+ {u:2,id:'u2b',q:`Which is NOT a property of a mineral?`,o:[`naturally occurring`,`organic`,`crystalline structure`,`definite chemical composition`],c:1,e:`Minerals are inorganic, not organic.`},
+ {u:2,id:'u2c',q:`Sedimentary rock is most likely to contain:`,o:[`large interlocking crystals`,`fossils and layers`,`lava`,`foliated bands`],c:1,e:`Sedimentary rock forms from layered sediment and may hold fossils.`},
+ {u:2,id:'u2d',q:`Marble forms from limestone by heat and pressure. Marble is:`,o:[`igneous`,`sedimentary`,`metamorphic`,`a mineral`],c:2,e:`Heat and pressure changing an existing rock makes metamorphic rock.`},
+ {u:2,id:'u2e',q:`The color of a mineral's powder is its:`,o:[`luster`,`cleavage`,`streak`,`hardness`],c:2,e:`Streak = the powder color, a useful ID property.`},
+ {u:2,id:'u2f',q:`A correct statement about the rock cycle is that:`,o:[`it always starts with igneous rock`,`any rock can become any other rock type`,`it has stopped today`,`only heat changes rock`],c:1,e:`The cycle is continuous with no fixed starting point.`},
+ // Unit 3
+ {u:3,id:'u3a',q:`Earth's layers from the outside in are:`,o:[`crust, mantle, outer core, inner core`,`mantle, crust, core`,`crust, core, mantle`,`core, mantle, crust`],c:0,e:`Crust → solid mantle → liquid outer core → solid inner core.`},
+ {u:3,id:'u3b',q:`The heat that drives mantle convection comes mainly from:`,o:[`sunlight`,`ocean currents`,`radioactive decay inside Earth`,`tides`],c:2,e:`Decay of uranium, thorium, and potassium heats Earth's interior.`},
+ {u:3,id:'u3c',q:`New oceanic crust forms by sea-floor spreading at a:`,o:[`convergent boundary`,`transform boundary`,`divergent boundary`,`hotspot`],c:2,e:`Divergent boundaries pull apart, forming new crust.`},
+ {u:3,id:'u3d',q:`Which seismic wave is fastest and travels through liquids?`,o:[`P-wave`,`S-wave`,`Love wave`,`Rayleigh wave`],c:0,e:`P-waves are fastest and pass through solids, liquids, and gases.`},
+ {u:3,id:'u3e',q:`The point on the surface directly above an earthquake's focus is the:`,o:[`epicenter`,`magnitude`,`Moho`,`hotspot`],c:0,e:`Epicenter = surface point above the focus.`},
+ {u:3,id:'u3f',q:`Identical fossils on continents now separated by oceans are evidence of:`,o:[`the Coriolis effect`,`plate tectonics`,`tides`,`the rock cycle`],c:1,e:`They make sense only if the continents were once joined and drifted apart.`},
+ {u:3,id:'u3g',q:`S-waves can travel only through:`,o:[`solids`,`liquids`,`gases`,`empty space`],c:0,e:`S-waves move only through solids — key evidence for Earth's liquid outer core.`},
+ // Unit 4
+ {u:4,id:'u4a',q:`Frost wedging (water freezing in cracks) is an example of:`,o:[`chemical weathering`,`mechanical weathering`,`deposition`,`runoff`],c:1,e:`It breaks rock physically, without changing its chemistry.`},
+ {u:4,id:'u4b',q:`The rusting of iron-rich rock is:`,o:[`abrasion`,`oxidation`,`frost wedging`,`deposition`],c:1,e:`Oxidation is chemical weathering — oxygen reacting with iron.`},
+ {u:4,id:'u4c',q:`How easily water flows through the pores of a rock is its:`,o:[`porosity`,`permeability`,`density`,`albedo`],c:1,e:`Permeability = ability to transmit water; porosity = space to hold it.`},
+ {u:4,id:'u4d',q:`A property of water that lets it crack rocks is that it:`,o:[`expands when it freezes`,`is a poor solvent`,`blocks all light`,`never dissolves anything`],c:0,e:`Ice takes up more space than liquid water, prying cracks open.`},
+ {u:4,id:'u4e',q:`Weathering differs from erosion because weathering:`,o:[`moves sediment far away`,`breaks rock down in place`,`only happens in oceans`,`builds mountains`],c:1,e:`Weathering breaks rock where it is; erosion transports the pieces.`},
+ {u:4,id:'u4f',q:`Water returning to the air from both surfaces and plants is:`,o:[`infiltration`,`runoff`,`evapotranspiration`,`deposition`],c:2,e:`Evapotranspiration = evaporation + water released by plants.`},
+ // Unit 5
+ {u:5,id:'u5a',q:`The time for half of a radioactive sample to decay is its:`,o:[`magnitude`,`half-life`,`eccentricity`,`albedo`],c:1,e:`Half-life is the basis of radiometric dating.`},
+ {u:5,id:'u5b',q:`About how old are Earth and the solar system?`,o:[`4.6 million years`,`13.8 billion years`,`4.6 billion years`,`541 million years`],c:2,e:`~4.6 billion years (the universe is ~13.8 billion).`},
+ {u:5,id:'u5c',q:`We study Moon rocks and meteorites to learn about early Earth because they:`,o:[`are older than the universe`,`have changed little in billions of years`,`are made of different elements`,`formed after Earth`],c:1,e:`Earth's oldest rocks were destroyed by tectonics and erosion; the Moon's were not.`},
+ {u:5,id:'u5d',q:`Oxygen first built up in Earth's atmosphere mainly because of:`,o:[`volcanic eruptions`,`photosynthesis by cyanobacteria`,`asteroid impacts`,`radioactive decay`],c:1,e:`Cyanobacteria released oxygen, leading to the Great Oxidation Event.`},
+ {u:5,id:'u5e',q:`The clumping of dust and gas that built the planets is called:`,o:[`accretion`,`convection`,`subduction`,`erosion`],c:0,e:`Accretion built planetesimals, which grew into planets.`},
+ {u:5,id:'u5f',q:`A common cause of mass extinctions has been:`,o:[`large asteroid impacts`,`neap tides`,`the Coriolis effect`,`low albedo`],c:0,e:`Asteroid impacts, huge eruptions, and climate change have all caused extinctions.`},
+ // Unit 6
+ {u:6,id:'u6a',q:`The Sun's apparent daily rise in the east is caused by Earth's:`,o:[`revolution`,`tilt`,`rotation`,`eccentricity`],c:2,e:`Rotation (spin) causes day/night and the Sun's apparent motion.`},
+ {u:6,id:'u6b',q:`A Foucault pendulum is evidence of Earth's:`,o:[`revolution`,`rotation`,`magnetic field`,`tilt`],c:1,e:`Its swing plane shifts because Earth rotates beneath it.`},
+ {u:6,id:'u6c',q:`A lunar eclipse can occur only during a:`,o:[`new Moon`,`first quarter`,`full Moon`,`waxing crescent`],c:2,e:`At full Moon, Earth's shadow can fall on the Moon.`},
+ {u:6,id:'u6d',q:`Spring tides (largest range) occur when the Sun, Moon, and Earth are:`,o:[`at right angles`,`aligned (new or full Moon)`,`at first quarter`,`farthest apart`],c:1,e:`Alignment combines the Sun's and Moon's pulls.`},
+ {u:6,id:'u6e',q:`The seasons are caused mainly by:`,o:[`Earth's changing distance from the Sun`,`the 23.5° tilt of Earth's axis`,`sunspots`,`the Moon's gravity`],c:1,e:`Axial tilt changes the directness of sunlight — not distance.`},
+ {u:6,id:'u6f',q:`About how long is the Moon's full cycle of phases?`,o:[`24 hours`,`7 days`,`29.5 days`,`365 days`],c:2,e:`~29.5 days, one lunar month.`},
+ {u:6,id:'u6g',q:`A solar eclipse can occur only during a:`,o:[`full Moon`,`new Moon`,`last quarter`,`gibbous Moon`],c:1,e:`At new Moon, the Moon can pass between Earth and the Sun.`},
+ // Unit 7
+ {u:7,id:'u7a',q:`Stars produce energy by:`,o:[`nuclear fission`,`combustion`,`fusion of hydrogen into helium`,`radioactive decay`],c:2,e:`Fusion converts a tiny bit of lost mass into energy.`},
+ {u:7,id:'u7b',q:`Elements heavier than iron are formed mainly:`,o:[`in small stars' cores`,`during supernova explosions`,`on planets`,`directly by the Big Bang`],c:1,e:`Only supernovae have the energy to fuse elements past iron.`},
+ {u:7,id:'u7c',q:`What a star becomes is determined mainly by its:`,o:[`color`,`distance from Earth`,`initial mass`,`name`],c:2,e:`Mass sets a star's whole life path and lifespan.`},
+ {u:7,id:'u7d',q:`On the H-R diagram, the Sun is a:`,o:[`white dwarf`,`supergiant`,`main-sequence star`,`red giant`],c:2,e:`The Sun is an average main-sequence star fusing hydrogen.`},
+ {u:7,id:'u7e',q:`A star with a lower (more negative) absolute magnitude is:`,o:[`dimmer`,`brighter`,`cooler`,`closer`],c:1,e:`Lower magnitude value = brighter star.`},
+ {u:7,id:'u7f',q:`Redshift of distant galaxies is evidence the universe is:`,o:[`shrinking`,`unchanging`,`expanding`,`rotating`],c:2,e:`Farther galaxies recede faster (Hubble's Law) — the universe is expanding.`},
+ {u:7,id:'u7g',q:`By Kepler's laws, a planet moves fastest when it is:`,o:[`farthest from the Sun`,`closest to the Sun`,`at average distance`,`aligned with the Moon`],c:1,e:`Planets speed up near the Sun (perihelion).`},
+ // Unit 8
+ {u:8,id:'u8a',q:`Surface winds blow from areas of:`,o:[`low to high pressure`,`high to low pressure`,`warm to cold only`,`land to sea only`],c:1,e:`Wind always moves from high pressure toward low pressure.`},
+ {u:8,id:'u8b',q:`Adding water vapor to air makes its pressure:`,o:[`increase`,`decrease`,`stay the same`,`become zero`],c:1,e:`Water vapor is lighter than dry air, so humid air has lower pressure.`},
+ {u:8,id:'u8c',q:`A cold front typically brings:`,o:[`light drizzle for days`,`clear dry skies`,`thunderstorms and heavy rain`,`no change`],c:2,e:`Cold air shoves under warm air, forcing it up fast → storms.`},
+ {u:8,id:'u8d',q:`Closely spaced isobars on a weather map indicate:`,o:[`calm air`,`strong winds`,`high temperature`,`clear skies`],c:1,e:`A steep pressure gradient = faster wind.`},
+ {u:8,id:'u8e',q:`In the Northern Hemisphere, hurricanes rotate:`,o:[`clockwise`,`counterclockwise`,`not at all`,`east to west only`],c:1,e:`The Coriolis effect makes them spin counterclockwise in the N. Hemisphere.`},
+ {u:8,id:'u8f',q:`The Gulf Stream is an example of a:`,o:[`wind-driven surface ocean current`,`seismic wave`,`cold front`,`tide`],c:0,e:`It carries warm water and helps warm Europe.`},
+ {u:8,id:'u8g',q:`Oceans absorbing CO₂ and becoming more acidic (harming shellfish) is:`,o:[`saltwater intrusion`,`ocean acidification`,`the urban heat island`,`albedo`],c:1,e:`Ocean acidification threatens coral and shellfish.`}
+];
+
+/* ===================== STATE / GAME ===================== */
+const app=document.getElementById('app');
+let read={}, xp=0, earned={};
+try{read=JSON.parse(localStorage.getItem('ess_read')||'{}')}catch(e){read={}}
+try{xp=parseInt(localStorage.getItem('ess_xp'))||0}catch(e){xp=0}
+try{earned=JSON.parse(localStorage.getItem('ess_earned')||'{}')}catch(e){earned={}}
+function save(){try{localStorage.setItem('ess_read',JSON.stringify(read));localStorage.setItem('ess_xp',xp);localStorage.setItem('ess_earned',JSON.stringify(earned))}catch(e){}}
+const WAYPOINTS=["Inner Core","Outer Core","Mantle","Crust","Oceans","Atmosphere","The Moon","The Sun","Nearby Stars","The Milky Way","Edge of the Universe"];
+const PER=55;
+function reached(){return Math.min(WAYPOINTS.length, Math.floor(xp/PER))}
+const RANKS=[[0,"Rookie","🔰"],[110,"Field Scientist","🔬"],[220,"Geologist","🪨"],[340,"Meteorologist","🌦️"],[460,"Astronomer","🔭"],[580,"Regents Master","🏆"]];
+function rankFor(g){let r=RANKS[0];RANKS.forEach(x=>{if(g>=x[0])r=x});return r}
+function renderStats(){const r=rankFor(xp);const el=document.getElementById('stats');if(el)el.innerHTML=`<span class="pill xp">⚡ ${xp} XP</span><span class="pill">${r[2]} ${r[1]}</span>`}
+function toast(m,t){const b=document.getElementById('toasts');if(!b)return;const d=document.createElement('div');d.className='toast'+(t?' terr':'');d.textContent=m;b.appendChild(d);setTimeout(()=>d.remove(),2100)}
+function addXP(amt,key,label){if(key){if(earned[key])return;earned[key]=true}const before=reached();xp+=amt;save();renderStats();toast(`+${amt} ⚡ ${label||''}`.trim());const after=reached();for(let k=before;k<after;k++){setTimeout(()=>toast(`🚀 Reached ${WAYPOINTS[k]}!`,true),500*(k-before+1))}}
+function resetGame(){if(!confirm("Restart your journey? This clears your XP, rank, and progress."))return;read={};xp=0;earned={};save();renderStats();home()}
+
+/* ===================== VIEWS ===================== */
+function unitProgress(u){let d=0;u.topics.forEach((t,ti)=>{if(read[u.n+'_'+ti])d++});return d}
+function home(){
+  renderStats();
+  const cap=reached(),N=WAYPOINTS.length,goal=PER*N,vpct=Math.round(Math.min(xp,goal)/goal*100);
+  let terr='';WAYPOINTS.forEach((t,k)=>{terr+=`<div class="terr ${k<cap?'won':''}"><span class="tflag">${k<cap?'🛰️':'•'}</span>${t}</div>`});
+  let html=`<div class="card journey">
+      <h3>🚀 Journey from the Core to the Cosmos</h3>
+      <p class="sub">Earn XP by studying &amp; quizzing. Every ${PER} XP launches you to the next waypoint!</p>
+      <div class="vbar"><div class="vfill" style="width:${vpct}%"></div><span class="vflag" style="left:${vpct}%">🚀</span></div>
+      <div class="vlabel">${cap} of ${N} waypoints reached</div>
+      <div class="terrgrid">${terr}</div>
+      ${cap>=N?`<div class="victory">🎉 You reached the edge of the universe — Regents Master!</div>`:''}
+    </div>
+    <a class="card" href="ess-study-companion.pdf" target="_blank" style="display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;border:2px solid var(--teal2)">
+      <div style="font-size:30px;flex-shrink:0">📘</div>
+      <div style="flex:1"><h3 style="margin:0;font-size:16px;color:var(--teal)">Printable Study Companion (PDF)</h3>
+      <span style="font-size:12px;color:#718096">A 30-page illustrated review to read or print. Opens in a new tab.</span></div>
+      <div style="color:#cbd5e0;font-size:22px">›</div>
+    </a>
+    <h3 class="secttitle">📚 Study by Unit</h3>`;
+  UNITS.forEach(u=>{const done=unitProgress(u),tot=u.topics.length,pct=Math.round(done/tot*100);
+    html+=`<div class="card daycard" onclick="unit(${u.n})"><div class="dnum">${u.n}</div>
+      <div class="dbody"><h3>${u.title}</h3><div class="dmeta">${tot} topics · ${QUESTIONS.filter(q=>q.u===u.n).length}-question quiz</div>
+      <div class="bar"><div style="width:${pct}%"></div></div></div><div class="chev">›</div></div>`});
+  html+=`<div class="card ultimate"><h3>🏆 Ultimate Review</h3>
+      <p style="margin:6px 0 0;font-size:14px">All ${QUESTIONS.length} questions from every unit, shuffled. The big mock-quiz!</p>
+      <button class="btn gold block" onclick="startQuiz('ALL')">Start the Ultimate Review →</button></div>
+    <span class="resetlink" onclick="resetGame()">↺ Restart journey (reset progress)</span>`;
+  app.innerHTML=html;window.scrollTo(0,0)}
+function unit(n){
+  renderStats();const u=UNITS.find(x=>x.n===n);
+  let html=`<div class="card"><span class="tag">Unit ${u.n}</span><h2 style="margin:4px 0 0;color:var(--teal)">${u.title}</h2></div>
+    <h3 class="secttitle">Topics — read &amp; check each one</h3>`;
+  u.topics.forEach((t,ti)=>{const done=read[u.n+'_'+ti];
+    html+=`<div class="card topiccard" onclick="topic(${n},${ti})"><div class="emoji">${t.emoji}</div>
+      <div class="t"><h3>${t.title}</h3><span>Tap to read &amp; check</span></div>
+      <div class="check ${done?'':'todo'}">${done?'✓':'○'}</div></div>`});
+  html+=`<button class="btn gold block" onclick="startQuiz(${n})">📝 Take the Unit ${n} Quiz (${QUESTIONS.filter(q=>q.u===n).length} questions)</button>
+    <button class="btn ghost block" onclick="home()">← All units</button>`;
+  app.innerHTML=html;window.scrollTo(0,0)}
+function topic(n,ti){
+  const u=UNITS.find(x=>x.n===n),t=u.topics[ti];
+  let html=`<div class="card summary"><h2>${t.emoji} ${t.title}</h2>${t.summary}</div>
+    <p style="text-align:center;color:#718096;font-size:14px;margin:14px 0 0">Read it, then test yourself on the next page. 👇</p>
+    <div class="navrow"><button class="btn ghost" onclick="unit(${n})">← Unit ${n}</button>
+      <button class="btn gold" onclick="check(${n},${ti})">✋ Quick Check →</button></div>`;
+  app.innerHTML=html;window.scrollTo(0,0);addXP(10,'read_'+n+'_'+ti,'Studied a topic!');read[n+'_'+ti]=true;save()}
+function check(n,ti){
+  const u=UNITS.find(x=>x.n===n),t=u.topics[ti];
+  let html=`<div class="card summary"><span class="tag">Quick Check</span><h2 style="margin-top:4px">${t.emoji} ${t.title}</h2>
+      <p style="color:#718096;font-size:14px;margin:0">Type your answer from memory, then tap to check.</p></div>`;
+  t.flash.forEach((f,j)=>{html+=`<div class="flash"><div class="qlabel">Flash ${j+1}</div><div class="q">${f.q}</div>
+      <input class="flashin" type="text" placeholder="Type your answer…" autocomplete="off">
+      <button class="reveal" onclick="revealAns(this)">Show answer</button><div class="ans">✓ ${f.a}</div></div>`});
+  html+=`<div class="navrow"><button class="btn ghost" onclick="topic(${n},${ti})">← Re-read</button>`;
+  if(ti<u.topics.length-1)html+=`<button class="btn primary" onclick="topic(${n},${ti+1})">Next topic →</button>`;
+  else html+=`<button class="btn gold" onclick="unit(${n})">Done with Unit ${n} ✓</button>`;
+  html+=`</div>`;app.innerHTML=html;window.scrollTo(0,0)}
+function revealAns(b){const c=b.closest('.flash');c.querySelector('.flashin').setAttribute('readonly','');c.querySelector('.ans').classList.add('show');b.style.display='none'}
+
+/* ---------- QUIZ ---------- */
+let qi=0,answers=[],QZ=[],quizMode='ALL';
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
+function buildQuiz(mode){const pool=mode==='ALL'?QUESTIONS.slice():QUESTIONS.filter(q=>q.u===mode);
+  QZ=pool.map(it=>{const o=it.o.map((text,idx)=>({text,correct:idx===it.c}));shuffle(o);return{id:it.id,q:it.q,o:o.map(x=>x.text),c:o.findIndex(x=>x.correct),e:it.e}});shuffle(QZ)}
+function startQuiz(mode){quizMode=mode;qi=0;answers=[];buildQuiz(mode);question()}
+function quizTitle(){return quizMode==='ALL'?'Ultimate Review':'Unit '+quizMode+' Quiz'}
+function question(){const it=QZ[qi];
+  let html=`<div class="card"><div class="qcount">${quizTitle()} · Question ${qi+1} of ${QZ.length}</div>
+    <div class="bar"><div style="width:${Math.round(qi/QZ.length*100)}%"></div></div><div class="qtext">${it.q}</div>`;
+  it.o.forEach((opt,k)=>{html+=`<button class="opt" onclick="answer(${k})">${opt}</button>`});
+  html+=`<div class="explain"></div><button class="btn primary block hidden" id="nextbtn" onclick="next()">${qi<QZ.length-1?'Next →':'See my score 🎉'}</button>
+    <button class="btn ghost block" style="margin-top:14px" onclick="${quizMode==='ALL'?'home()':'unit('+quizMode+')'}">Quit quiz</button></div>`;
+  app.innerHTML=html;window.scrollTo(0,0)}
+function answer(k){const it=QZ[qi];if(answers[qi]!==undefined)return;answers[qi]=k;
+  app.querySelectorAll('.opt').forEach((b,idx)=>{b.classList.add('disabled');b.onclick=null;if(idx===it.c)b.classList.add('correct');if(idx===k&&k!==it.c)b.classList.add('wrong')});
+  const ex=app.querySelector('.explain');ex.innerHTML=(k===it.c?'✅ <b>Correct!</b> ':'❌ <b>Not quite.</b> ')+it.e;ex.classList.add('show');
+  if(k===it.c)addXP(10,'q_'+it.id,'Correct!');app.querySelector('#nextbtn').classList.remove('hidden')}
+function next(){if(qi<QZ.length-1){qi++;question()}else results()}
+function results(){let score=0;answers.forEach((a,i)=>{if(a===QZ[i].c)score++});
+  if(quizMode==='ALL'&&score===QZ.length)addXP(100,'perfect_all','PERFECT ULTIMATE REVIEW!');
+  const pct=Math.round(score/QZ.length*100);let msg,color;
+  if(pct>=90){msg="Outstanding — Regents-ready! 🏆";color="var(--green)"}else if(pct>=75){msg="Great work — almost there! 💪";color="var(--green)"}
+  else if(pct>=60){msg="Good start — review the misses. 📖";color="var(--amber)"}else{msg="Keep studying — you've got this! 📚";color="var(--red)"}
+  let html=`<div class="card scorebox"><div class="big" style="color:${color}">${score}/${QZ.length}</div><div class="msg">${msg}</div>
+      <button class="btn gold" onclick="startQuiz('${quizMode}')">↻ Retake</button>
+      <button class="btn ghost block" onclick="${quizMode==='ALL'?'home()':'unit('+quizMode+')'}">${quizMode==='ALL'?'Back to home':'Back to Unit '+quizMode}</button></div>
+    <div class="card review"><h4>Review your answers</h4>`;
+  QZ.forEach((it,i)=>{const a=answers[i],ok=a===it.c;
+    html+=`<div class="ritem ${ok?'ok':'no'}"><span class="icon">${ok?'✅':'❌'}</span>${it.q}<br><b>Answer:</b> ${it.o[it.c]}${!ok?`<br><span style="color:var(--red)">You chose: ${it.o[a]}</span>`:''}<br><span style="color:#5a6b66">${it.e}</span></div>`});
+  html+=`</div>`;app.innerHTML=html;window.scrollTo(0,0)}
+home();
+</script>
+</body>
+</html>
