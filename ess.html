@@ -494,11 +494,14 @@ const CR_QUESTIONS = [
 let crOrder=[], crIdx=0;
 function graderUrl(){ try{return localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
 function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('ess_grader_url',u.trim())}catch(e){} crHome(); } }
+function crProg(){ try{return JSON.parse(localStorage.getItem('ess_cr')||'{}')}catch(e){return {}} }
+function crSaveResult(id,c,m){ const p=crProg(); p[id]={c:c,m:m}; try{localStorage.setItem('ess_cr',JSON.stringify(p))}catch(e){} }
+function crResetProg(){ if(confirm('Clear your written-answer progress and start fresh?')){ try{localStorage.removeItem('ess_cr')}catch(e){} } crHome(); }
 function crHome(){
   renderStats();
   const url=graderUrl();
   let html=`<div class="card summary"><span class="tag">Written-Answer Practice</span><h2 style="margin:4px 0 0;color:var(--teal)">✍️ Constructed Response</h2>
-    <p style="font-size:14px;color:#5a6b66">About 40% of the real Regents is written answers. Type an answer below and Claude grades it like a Regents scorer — with specific feedback on what would earn full credit.</p></div>`;
+    <p style="font-size:14px;color:#5a6b66">About 40% of the real Regents is written answers. Type an answer below and Claude grades it like a Regents scorer — with specific feedback on what would earn full credit. Your progress is saved on this device, so you can stop and pick up later.</p></div>`;
   if(!url){
     html+=`<div class="card" style="border:2px solid var(--amber)"><h3 style="margin-top:0;color:var(--amber)">One-time setup</h3>
       <p style="font-size:14px">A grown-up sets up a tiny free "grader" once (it keeps the API key private). After the setup steps, paste the grader's web address here.</p>
@@ -506,13 +509,30 @@ function crHome(){
       <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
     app.innerHTML=html;window.scrollTo(0,0);return;
   }
-  html+=`<div class="card" style="text-align:center"><p style="margin:0 0 10px">${CR_QUESTIONS.length} written-answer prompts ready.</p>
-      <button class="btn gold block" onclick="crStart()">Start practicing →</button>
-      <button class="btn ghost block" onclick="setGraderUrl()">Change grader URL</button>
+  const p=crProg(), total=CR_QUESTIONS.length;
+  const done=CR_QUESTIONS.filter(q=>p[q.id]), doneCount=done.length;
+  const full=done.filter(q=>p[q.id].c>=p[q.id].m).length, missed=doneCount-full;
+  const left=total-doneCount, pct=Math.round(doneCount/total*100);
+  html+=`<div class="card">
+    <div style="display:flex;justify-content:space-between;font-size:13px;color:#5a6b66;margin-bottom:6px"><span><b>${doneCount}</b> of ${total} answered</span><span>${full} full marks${missed?' · '+missed+' to improve':''}</span></div>
+    <div style="background:#e2e8e6;border-radius:99px;height:12px;overflow:hidden"><div style="background:var(--teal);height:100%;width:${pct}%;transition:width .4s"></div></div>`;
+  if(doneCount===0){
+    html+=`<button class="btn gold block" style="margin-top:14px" onclick="crStart()">Start practicing →</button>`;
+  } else if(left>0){
+    html+=`<button class="btn gold block" style="margin-top:14px" onclick="crStart()">Continue — ${left} left →</button>`;
+    if(missed) html+=`<button class="btn primary block" onclick="crStartMissed()">Redo the ${missed} I should improve</button>`;
+    html+=`<button class="btn ghost block" onclick="crResetProg()">Start over</button>`;
+  } else {
+    html+=`<p style="text-align:center;margin:14px 0 6px;font-weight:700;color:var(--teal)">🎉 All ${total} answered!</p>`;
+    if(missed) html+=`<button class="btn primary block" onclick="crStartMissed()">Redo the ${missed} I should improve</button>`;
+    html+=`<button class="btn gold block" onclick="crResetProg()">Practice all again from scratch</button>`;
+  }
+  html+=`<button class="btn ghost block" onclick="setGraderUrl()">Change grader URL</button>
       <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
   app.innerHTML=html;window.scrollTo(0,0);
 }
-function crStart(){ crOrder=shuffle(CR_QUESTIONS.map((_,i)=>i)); crIdx=0; crQuestion(); }
+function crStart(){ const p=crProg(); let pool=CR_QUESTIONS.map((_,i)=>i).filter(i=>!p[CR_QUESTIONS[i].id]); if(!pool.length) pool=CR_QUESTIONS.map((_,i)=>i); crOrder=shuffle(pool); crIdx=0; crQuestion(); }
+function crStartMissed(){ const p=crProg(); const pool=CR_QUESTIONS.map((_,i)=>i).filter(i=>p[CR_QUESTIONS[i].id] && p[CR_QUESTIONS[i].id].c<p[CR_QUESTIONS[i].id].m); if(!pool.length){ crHome(); return; } crOrder=shuffle(pool); crIdx=0; crQuestion(); }
 function crQuestion(){
   const q=CR_QUESTIONS[crOrder[crIdx]];
   let html=`<div class="card"><div class="qcount">Written Answer ${crIdx+1} of ${crOrder.length}</div>
@@ -542,6 +562,7 @@ async function crGrade(){
     const miss=(d.missing&&d.missing.length)?`<br><b>For full credit:</b> ${d.missing.join('; ')}`:'';
     res.innerHTML=`<div class="explain show" style="border-left:4px solid ${color}"><b style="color:${color}">Score: ${got}/${max}</b><br>${d.feedback||''}${miss}</div>`;
     addXP(got*10,'cr_'+q.id,'Written answer graded!');
+    crSaveResult(q.id,got,max);
     btn.style.display='none';
     const nx=document.createElement('button'); nx.className='btn primary block'; nx.textContent=(crIdx<crOrder.length-1)?'Next prompt →':'Done ✓';
     nx.onclick=function(){ if(crIdx<crOrder.length-1){crIdx++;crQuestion();}else crHome(); };
