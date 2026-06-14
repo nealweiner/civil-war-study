@@ -492,8 +492,8 @@ const CR_QUESTIONS = [
   sample:`Because the orbit is an ellipse, the planet's distance from the Sun changes. When it is closest to the Sun, the Sun's gravity is strongest and the planet moves fastest. When it is farthest away, gravity is weaker and the planet moves slowest.`}
 ];
 let crOrder=[], crIdx=0;
-function graderUrl(){ try{return localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
-function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('ess_grader_url',u.trim())}catch(e){} crHome(); } }
+function graderUrl(){ try{return localStorage.getItem('grader_url')||localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
+function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(); } }
 function crProg(){ try{return JSON.parse(localStorage.getItem('ess_cr')||'{}')}catch(e){return {}} }
 function crSaveResult(id,c,m){ const p=crProg(); p[id]={c:c,m:m}; try{localStorage.setItem('ess_cr',JSON.stringify(p))}catch(e){} }
 function crResetProg(){ if(confirm('Clear your written-answer progress and start fresh?')){ try{localStorage.removeItem('ess_cr')}catch(e){} } crHome(); }
@@ -554,7 +554,7 @@ async function crGrade(){
   const res=document.getElementById('crresult');
   res.innerHTML=`<div class="explain show">⏳ Claude is grading your answer…</div>`;
   try{
-    const r=await fetch(graderUrl(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q.prompt,rubric:q.rubric,maxCredit:q.maxCredit,studentAnswer:ans})});
+    const r=await fetch(graderUrl(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({subject:'Earth & Space Science Regents',question:q.prompt,rubric:q.rubric,maxCredit:q.maxCredit,studentAnswer:ans})});
     const d=await r.json();
     if(d.error){ res.innerHTML=`<div class="explain show" style="border-left:4px solid var(--red)">⚠️ ${d.error}${d.detail?'<br><small>'+(''+d.detail).slice(0,200)+'</small>':''}</div>`; btn.textContent='Try again'; btn.disabled=false; return; }
     const got=(typeof d.credit==='number')?d.credit:0, max=d.maxCredit||q.maxCredit;
