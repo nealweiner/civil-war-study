@@ -350,12 +350,6 @@ function home(){
       <span style="font-size:12px;color:#718096">A 30-page illustrated review to read or print. Opens in a new tab.</span></div>
       <div style="color:#cbd5e0;font-size:22px">›</div>
     </a>
-    <div class="card" onclick="crHome()" style="cursor:pointer;display:flex;align-items:center;gap:14px;border:2px solid var(--amber)">
-      <div style="font-size:30px;flex-shrink:0">✍️</div>
-      <div style="flex:1"><h3 style="margin:0;font-size:16px;color:var(--amber)">Written-Answer Practice</h3>
-      <span style="font-size:12px;color:#718096">Type constructed-response answers — Claude grades them like a Regents scorer.</span></div>
-      <div style="color:#cbd5e0;font-size:22px">›</div>
-    </div>
     <h3 class="secttitle">📚 Study by Unit</h3>`;
   UNITS.forEach(u=>{const done=unitProgress(u),tot=u.topics.length,pct=Math.round(done/tot*100);
     html+=`<div class="card daycard" onclick="unit(${u.n})"><div class="dnum">${u.n}</div>
@@ -374,8 +368,9 @@ function unit(n){
     html+=`<div class="card topiccard" onclick="topic(${n},${ti})"><div class="emoji">${t.emoji}</div>
       <div class="t"><h3>${t.title}</h3><span>Tap to read &amp; check</span></div>
       <div class="check ${done?'':'todo'}">${done?'✓':'○'}</div></div>`});
-  html+=`<button class="btn gold block" onclick="startQuiz(${n})">📝 Take the Unit ${n} Quiz (${QUESTIONS.filter(q=>q.u===n).length} questions)</button>
-    <button class="btn ghost block" onclick="home()">← All units</button>`;
+  html+=`<button class="btn gold block" onclick="startQuiz(${n})">📝 Take the Unit ${n} Quiz (${QUESTIONS.filter(q=>q.u===n).length} questions)</button>`;
+  if(crCountForUnit(n)>0) html+=`<button class="btn primary block" onclick="crHome(${n})">✍️ Written-Answer Practice (${crCountForUnit(n)})</button>`;
+  html+=`<button class="btn ghost block" onclick="home()">← All units</button>`;
   app.innerHTML=html;window.scrollTo(0,0)}
 function topic(n,ti){
   const u=UNITS.find(x=>x.n===n),t=u.topics[ti];
@@ -430,89 +425,92 @@ function results(){let score=0;answers.forEach((a,i)=>{if(a===QZ[i].c)score++});
   html+=`</div>`;app.innerHTML=html;window.scrollTo(0,0)}
 /* ---------- CONSTRUCTED RESPONSE (Claude-graded) ---------- */
 const CR_QUESTIONS = [
- {id:'cr1', prompt:`Explain why igneous rock that cools slowly deep underground forms larger crystals than rock that cools quickly at the surface.`,
+ {id:'cr1', u:2, prompt:`Explain why igneous rock that cools slowly deep underground forms larger crystals than rock that cools quickly at the surface.`,
   rubric:`Must connect SLOW cooling to MORE TIME for crystals to grow → LARGER crystals (and/or fast cooling = less time = small/fine/glassy).`, maxCredit:1,
   sample:`When magma cools slowly underground, there is more time for crystals to grow, so they become large. Lava that cools quickly at the surface gives crystals little time to form, so they stay small or glassy.`},
- {id:'cr2', prompt:`Using cause and effect, explain how burning fossil fuels leads to global warming.`,
+ {id:'cr2', u:8, prompt:`Using cause and effect, explain how burning fossil fuels leads to global warming.`,
   rubric:`Must show the chain: burning fossil fuels releases CO₂ (a greenhouse gas) → greenhouse gases trap heat → average global temperature rises.`, maxCredit:1,
   sample:`Burning fossil fuels releases carbon dioxide, a greenhouse gas. Greenhouse gases trap heat in the atmosphere, so as their amount increases, Earth's average temperature rises.`},
- {id:'cr3', prompt:`A student says the seasons are caused by Earth being closer to the Sun in summer. Construct an argument explaining why this is incorrect.`,
+ {id:'cr3', u:6, prompt:`A student says the seasons are caused by Earth being closer to the Sun in summer. Construct an argument explaining why this is incorrect.`,
   rubric:`Must state seasons are caused by Earth's 23.5° axial TILT (not distance), and that the tilt changes the directness/angle of sunlight and the length of day for each hemisphere.`, maxCredit:1,
   sample:`The seasons are not caused by distance. Earth's axis is tilted 23.5°. The hemisphere tilted toward the Sun gets more direct sunlight and longer days (summer); the one tilted away gets less direct light and shorter days (winter).`},
- {id:'cr4', prompt:`Explain how the phases of the Moon are produced.`,
+ {id:'cr4', u:6, prompt:`Explain how the phases of the Moon are produced.`,
   rubric:`Must say phases come from the changing positions of the Earth, Moon, and Sun, so we see different amounts of the Moon's sunlit half (cycle ~29.5 days).`, maxCredit:1,
   sample:`As the Moon orbits Earth, the positions of the Earth, Moon, and Sun change, so we see different amounts of the Moon's lit half. This cycle of phases repeats about every 29.5 days.`},
- {id:'cr5', prompt:`Earthquake S-waves do not pass through Earth's outer core, but P-waves do. Use this evidence to explain what it tells scientists about the outer core.`,
+ {id:'cr5', u:3, prompt:`Earthquake S-waves do not pass through Earth's outer core, but P-waves do. Use this evidence to explain what it tells scientists about the outer core.`,
   rubric:`Must use that S-waves travel only through SOLIDS while P-waves also travel through liquids; since S-waves don't pass through the outer core, the outer core must be LIQUID.`, maxCredit:1,
   sample:`S-waves can only travel through solids, while P-waves can also travel through liquids. Because S-waves cannot pass through the outer core but P-waves can, the outer core must be liquid.`},
- {id:'cr6', prompt:`Explain how melting sea ice creates a positive feedback loop that increases warming.`,
+ {id:'cr6', u:1, prompt:`Explain how melting sea ice creates a positive feedback loop that increases warming.`,
   rubric:`Must show the loop: melting ice lowers albedo (less reflection) → darker surface absorbs more sunlight/heat → more warming → even more ice melts.`, maxCredit:1,
   sample:`When sea ice melts, it exposes darker ocean, lowering Earth's albedo. The darker water absorbs more sunlight instead of reflecting it, causing more warming, which melts even more ice — a positive feedback loop.`},
- {id:'cr7', prompt:`Construct an explanation for how the redshift of distant galaxies supports the Big Bang theory.`,
+ {id:'cr7', u:7, prompt:`Construct an explanation for how the redshift of distant galaxies supports the Big Bang theory.`,
   rubric:`Must say light from distant galaxies is shifted to longer (red) wavelengths → galaxies moving away; farther galaxies move faster → the universe is expanding (supporting the Big Bang).`, maxCredit:1,
   sample:`Light from distant galaxies is stretched toward longer, redder wavelengths, which means the galaxies are moving away. The farther a galaxy is, the faster it moves away, showing the universe is expanding — evidence it began with the Big Bang.`},
- {id:'cr8', prompt:`Explain why scientists study Moon rocks and meteorites to learn about Earth's earliest history.`,
+ {id:'cr8', u:5, prompt:`Explain why scientists study Moon rocks and meteorites to learn about Earth's earliest history.`,
   rubric:`Must say Earth's oldest rocks were destroyed/changed by plate tectonics and erosion, while the Moon/meteorites have changed very little, so they preserve a record of the early solar system.`, maxCredit:1,
   sample:`Most of Earth's oldest rocks were destroyed or changed by plate tectonics and erosion. The Moon and meteorites have barely changed in billions of years, so they preserve a record of the early solar system and early Earth.`},
- {id:'cr9', prompt:`Explain how convection currents in the mantle cause Earth's tectonic plates to move.`,
+ {id:'cr9', u:3, prompt:`Explain how convection currents in the mantle cause Earth's tectonic plates to move.`,
   rubric:`Must say heat (from the core/radioactive decay) makes mantle rock rise, then it cools and sinks, forming convection currents; these currents drag/push the plates above them, moving them.`, maxCredit:1,
   sample:`Heat from Earth's interior warms the mantle, making the hot rock rise. As it cools near the surface it sinks again, creating convection currents. These slow-moving currents drag the tectonic plates above them, causing the plates to move.`},
- {id:'cr10', prompt:`A rock contains a radioactive element with a half-life of 1.3 billion years. Explain how a scientist could use this to estimate the rock's age.`,
+ {id:'cr10', u:5, prompt:`A rock contains a radioactive element with a half-life of 1.3 billion years. Explain how a scientist could use this to estimate the rock's age.`,
   rubric:`Must explain that the radioactive element decays into a stable product at a known rate (half-life = time for half to decay), so by measuring the ratio of remaining element to decay product, the scientist counts how many half-lives have passed and multiplies to find the age.`, maxCredit:1,
   sample:`The radioactive element decays into a stable product at a steady rate — every half-life (1.3 billion years) half of what remains decays. By measuring the ratio of leftover radioactive element to its decay product, the scientist figures out how many half-lives have passed and multiplies by 1.3 billion years to estimate the rock's age.`},
- {id:'cr11', prompt:`Explain why chemical weathering happens faster in a warm, wet climate than in a cold, dry one.`,
+ {id:'cr11', u:4, prompt:`Explain why chemical weathering happens faster in a warm, wet climate than in a cold, dry one.`,
   rubric:`Must say heat and water (moisture) speed up the chemical reactions that break down rock, so more warmth and water = faster chemical weathering.`, maxCredit:1,
   sample:`Chemical weathering depends on water and heat to break down rock. A warm, wet climate has plenty of both, so the chemical reactions happen faster. A cold, dry climate has little water and slower reactions, so weathering is much slower.`},
- {id:'cr12', prompt:`Explain how energy from the Sun drives the water cycle.`,
+ {id:'cr12', u:4, prompt:`Explain how energy from the Sun drives the water cycle.`,
   rubric:`Must say the Sun's energy evaporates water (liquid → vapor); the vapor rises and cools, condensing into clouds; then it falls back as precipitation.`, maxCredit:1,
   sample:`The Sun's energy heats water and evaporates it into water vapor. The vapor rises, cools, and condenses into clouds. When the droplets get heavy enough they fall back as precipitation, and the cycle repeats.`},
- {id:'cr13', prompt:`Explain what causes Earth to have daily high and low tides.`,
+ {id:'cr13', u:6, prompt:`Explain what causes Earth to have daily high and low tides.`,
   rubric:`Must say the Moon's gravity (and to a lesser extent the Sun's) pulls ocean water into bulges; as Earth rotates, each location passes through the bulges, giving roughly two high and two low tides per day.`, maxCredit:1,
   sample:`The Moon's gravity pulls on Earth's oceans, creating bulges of water on opposite sides of Earth. As Earth rotates, each coastline passes through the bulges (high tide) and the areas between them (low tide), giving about two high and two low tides each day.`},
- {id:'cr14', prompt:`On a Hertzsprung-Russell (H-R) diagram, describe the relationship between a main-sequence star's surface temperature and its brightness (luminosity).`,
+ {id:'cr14', u:7, prompt:`On a Hertzsprung-Russell (H-R) diagram, describe the relationship between a main-sequence star's surface temperature and its brightness (luminosity).`,
   rubric:`Must state that along the main sequence, hotter stars are brighter/more luminous and cooler stars are dimmer (temperature and luminosity increase together).`, maxCredit:1,
   sample:`Along the main sequence of an H-R diagram, a star's temperature and brightness increase together: the hotter (bluer) stars are the most luminous, and the cooler (redder) stars are the dimmest.`},
- {id:'cr15', prompt:`Explain how a star's mass determines how it will end its life.`,
+ {id:'cr15', u:7, prompt:`Explain how a star's mass determines how it will end its life.`,
   rubric:`Must say lower-mass stars (like the Sun) become red giants then white dwarfs, while high-mass stars explode as supernovas and leave behind a neutron star or black hole.`, maxCredit:1,
   sample:`A star's mass controls its fate. A low- or medium-mass star like the Sun swells into a red giant and then collapses into a white dwarf. A high-mass star explodes as a supernova and leaves behind a neutron star or a black hole.`},
- {id:'cr16', prompt:`Two cities are at the same latitude, but one is on the coast and one is far inland. Explain why the coastal city usually has milder summers and winters.`,
+ {id:'cr16', u:8, prompt:`Two cities are at the same latitude, but one is on the coast and one is far inland. Explain why the coastal city usually has milder summers and winters.`,
   rubric:`Must say water heats up and cools down more slowly than land (high specific heat), so the nearby ocean moderates the coastal city's temperature — cooler summers and warmer winters.`, maxCredit:1,
   sample:`Water heats and cools much more slowly than land. The ocean next to the coastal city stores heat and releases it slowly, so it keeps summers cooler and winters warmer. The inland city has no large water body to moderate it, so it gets hotter summers and colder winters.`},
- {id:'cr17', prompt:`Describe what happens at a divergent plate boundary and name one landform it creates.`,
+ {id:'cr17', u:3, prompt:`Describe what happens at a divergent plate boundary and name one landform it creates.`,
   rubric:`Must say two plates move apart and magma rises to fill the gap, forming new crust; landform = mid-ocean ridge (or rift valley).`, maxCredit:1,
   sample:`At a divergent boundary, two plates move away from each other. Magma rises up to fill the gap and hardens into new crust. This builds a mid-ocean ridge on the seafloor (or a rift valley on land).`},
- {id:'cr18', prompt:`Explain how the difference in arrival times between P-waves and S-waves helps scientists find how far away an earthquake's epicenter is.`,
+ {id:'cr18', u:3, prompt:`Explain how the difference in arrival times between P-waves and S-waves helps scientists find how far away an earthquake's epicenter is.`,
   rubric:`Must say P-waves travel faster and arrive first; the larger the time gap between the P-wave and S-wave arrivals, the farther away the epicenter (a chart/ESRT converts the lag to distance).`, maxCredit:1,
   sample:`P-waves travel faster than S-waves, so they always arrive first. The bigger the time gap between when the P-wave and the S-wave arrive at a station, the farther away the epicenter is. Scientists use the Earth Science Reference Tables to turn that time difference into a distance.`},
- {id:'cr19', prompt:`Explain why we do not have a solar eclipse and a lunar eclipse every month.`,
+ {id:'cr19', u:6, prompt:`Explain why we do not have a solar eclipse and a lunar eclipse every month.`,
   rubric:`Must say the Moon's orbit is tilted (about 5°) relative to Earth's orbit, so the Sun, Earth, and Moon usually do not line up exactly; eclipses happen only when they do align.`, maxCredit:1,
   sample:`The Moon's orbit is tilted about 5° compared to Earth's orbit around the Sun. Most months the Moon passes a little above or below the line between the Sun and Earth, so no eclipse happens. Only when the three line up exactly do we get a solar or lunar eclipse.`},
- {id:'cr20', prompt:`A planet travels around the Sun in an elliptical orbit. Explain how its speed changes as it moves closer to and farther from the Sun.`,
+ {id:'cr20', u:7, prompt:`A planet travels around the Sun in an elliptical orbit. Explain how its speed changes as it moves closer to and farther from the Sun.`,
   rubric:`Must say the planet moves fastest when it is closest to the Sun and slowest when it is farthest away (stronger gravitational pull when closer speeds it up).`, maxCredit:1,
   sample:`Because the orbit is an ellipse, the planet's distance from the Sun changes. When it is closest to the Sun, the Sun's gravity is strongest and the planet moves fastest. When it is farthest away, gravity is weaker and the planet moves slowest.`}
 ];
-let crOrder=[], crIdx=0;
+let crOrder=[], crIdx=0, crScope=null;
 function graderUrl(){ try{return localStorage.getItem('grader_url')||localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
-function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(); } }
+function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(crScope); } }
 function crProg(){ try{return JSON.parse(localStorage.getItem('ess_cr')||'{}')}catch(e){return {}} }
 function crSaveResult(id,c,m){ const p=crProg(); p[id]={c:c,m:m}; try{localStorage.setItem('ess_cr',JSON.stringify(p))}catch(e){} }
-function crResetProg(){ if(confirm('Clear your written-answer progress and start fresh?')){ try{localStorage.removeItem('ess_cr')}catch(e){} } crHome(); }
-function crHome(){
-  renderStats();
+function crForUnit(u){ return CR_QUESTIONS.map((_,i)=>i).filter(i=>CR_QUESTIONS[i].u===u); }
+function crCountForUnit(u){ return crForUnit(u).length; }
+function crResetProg(){ if(confirm('Clear your Unit '+crScope+' written-answer progress and start fresh?')){ const p=crProg(); crForUnit(crScope).forEach(i=>{ delete p[CR_QUESTIONS[i].id]; }); try{localStorage.setItem('ess_cr',JSON.stringify(p))}catch(e){} } crHome(crScope); }
+function crHome(u){
+  crScope=u; renderStats();
   const url=graderUrl();
-  let html=`<div class="card summary"><span class="tag">Written-Answer Practice</span><h2 style="margin:4px 0 0;color:var(--teal)">✍️ Constructed Response</h2>
-    <p style="font-size:14px;color:#5a6b66">About 40% of the real Regents is written answers. Type an answer below and Claude grades it like a Regents scorer — with specific feedback on what would earn full credit. Your progress is saved on this device, so you can stop and pick up later.</p></div>`;
+  const uu=UNITS.find(x=>x.n===u);
+  let html=`<div class="card summary"><span class="tag">Unit ${u} · Written Answers</span><h2 style="margin:4px 0 0;color:var(--teal)">✍️ ${uu?uu.title:''}</h2>
+    <p style="font-size:14px;color:#5a6b66">Constructed-response practice for this unit — about 40% of the real Regents is written answers. Claude grades each like a Regents scorer with specific feedback. Progress is saved on this device.</p></div>`;
   if(!url){
     html+=`<div class="card" style="border:2px solid var(--amber)"><h3 style="margin-top:0;color:var(--amber)">One-time setup</h3>
-      <p style="font-size:14px">A grown-up sets up a tiny free "grader" once (it keeps the API key private). After the setup steps, paste the grader's web address here.</p>
+      <p style="font-size:14px">A grown-up sets up a tiny free "grader" once (it keeps the API key private), then pastes its web address here. <b>If you already set it up for the Civil War app, it works here too.</b></p>
       <button class="btn gold block" onclick="setGraderUrl()">Paste grader URL</button>
-      <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
+      <button class="btn ghost block" onclick="unit(${u})">← Back to Unit ${u}</button></div>`;
     app.innerHTML=html;window.scrollTo(0,0);return;
   }
-  const p=crProg(), total=CR_QUESTIONS.length;
-  const done=CR_QUESTIONS.filter(q=>p[q.id]), doneCount=done.length;
-  const full=done.filter(q=>p[q.id].c>=p[q.id].m).length, missed=doneCount-full;
-  const left=total-doneCount, pct=Math.round(doneCount/total*100);
+  const p=crProg(), pool=crForUnit(u), total=pool.length;
+  const done=pool.filter(i=>p[CR_QUESTIONS[i].id]), doneCount=done.length;
+  const full=done.filter(i=>p[CR_QUESTIONS[i].id].c>=p[CR_QUESTIONS[i].id].m).length, missed=doneCount-full;
+  const left=total-doneCount, pct=total?Math.round(doneCount/total*100):0;
   html+=`<div class="card">
     <div style="display:flex;justify-content:space-between;font-size:13px;color:#5a6b66;margin-bottom:6px"><span><b>${doneCount}</b> of ${total} answered</span><span>${full} full marks${missed?' · '+missed+' to improve':''}</span></div>
     <div style="background:#e2e8e6;border-radius:99px;height:12px;overflow:hidden"><div style="background:var(--teal);height:100%;width:${pct}%;transition:width .4s"></div></div>`;
@@ -525,14 +523,14 @@ function crHome(){
   } else {
     html+=`<p style="text-align:center;margin:14px 0 6px;font-weight:700;color:var(--teal)">🎉 All ${total} answered!</p>`;
     if(missed) html+=`<button class="btn primary block" onclick="crStartMissed()">Redo the ${missed} I should improve</button>`;
-    html+=`<button class="btn gold block" onclick="crResetProg()">Practice all again from scratch</button>`;
+    html+=`<button class="btn gold block" onclick="crResetProg()">Practice all again</button>`;
   }
   html+=`<button class="btn ghost block" onclick="setGraderUrl()">Change grader URL</button>
-      <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
+      <button class="btn ghost block" onclick="unit(${u})">← Back to Unit ${u}</button></div>`;
   app.innerHTML=html;window.scrollTo(0,0);
 }
-function crStart(){ const p=crProg(); let pool=CR_QUESTIONS.map((_,i)=>i).filter(i=>!p[CR_QUESTIONS[i].id]); if(!pool.length) pool=CR_QUESTIONS.map((_,i)=>i); crOrder=shuffle(pool); crIdx=0; crQuestion(); }
-function crStartMissed(){ const p=crProg(); const pool=CR_QUESTIONS.map((_,i)=>i).filter(i=>p[CR_QUESTIONS[i].id] && p[CR_QUESTIONS[i].id].c<p[CR_QUESTIONS[i].id].m); if(!pool.length){ crHome(); return; } crOrder=shuffle(pool); crIdx=0; crQuestion(); }
+function crStart(){ const p=crProg(); let pool=crForUnit(crScope).filter(i=>!p[CR_QUESTIONS[i].id]); if(!pool.length) pool=crForUnit(crScope); crOrder=shuffle(pool.slice()); crIdx=0; crQuestion(); }
+function crStartMissed(){ const p=crProg(); const pool=crForUnit(crScope).filter(i=>p[CR_QUESTIONS[i].id] && p[CR_QUESTIONS[i].id].c<p[CR_QUESTIONS[i].id].m); if(!pool.length){ crHome(crScope); return; } crOrder=shuffle(pool.slice()); crIdx=0; crQuestion(); }
 function crQuestion(){
   const q=CR_QUESTIONS[crOrder[crIdx]];
   let html=`<div class="card"><div class="qcount">Written Answer ${crIdx+1} of ${crOrder.length}</div>
@@ -542,7 +540,7 @@ function crQuestion(){
     <div id="crresult"></div>
     <button class="reveal" onclick="document.getElementById('crsample').classList.add('show');this.style.display='none'">Show a model answer</button>
     <div class="ans" id="crsample">✓ ${q.sample}</div>
-    <button class="btn ghost block" onclick="crHome()" style="margin-top:14px">Quit</button>
+    <button class="btn ghost block" onclick="crHome(crScope)" style="margin-top:14px">Quit</button>
   </div>`;
   app.innerHTML=html;window.scrollTo(0,0);
 }
@@ -565,7 +563,7 @@ async function crGrade(){
     crSaveResult(q.id,got,max);
     btn.style.display='none';
     const nx=document.createElement('button'); nx.className='btn primary block'; nx.textContent=(crIdx<crOrder.length-1)?'Next prompt →':'Done ✓';
-    nx.onclick=function(){ if(crIdx<crOrder.length-1){crIdx++;crQuestion();}else crHome(); };
+    nx.onclick=function(){ if(crIdx<crOrder.length-1){crIdx++;crQuestion();}else crHome(crScope); };
     res.appendChild(nx);
   }catch(e){
     res.innerHTML=`<div class="explain show" style="border-left:4px solid var(--red)">⚠️ Couldn't reach the grader. Check the grader URL (Change grader URL) and your connection.</div>`;
