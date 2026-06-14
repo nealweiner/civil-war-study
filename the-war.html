@@ -490,7 +490,7 @@ const CR_QUESTIONS = [
   sample:`Women worked as nurses like Clara Barton, served as spies, and ran the farms, factories, and homes while men were away. By caring for the wounded, making supplies, and keeping the home front going, they kept the armies fed, healed, and supported throughout the war.`}
 ];
 let crOrder=[], crIdx=0, crScope=null;
-function graderUrl(){ try{return localStorage.getItem('grader_url')||''}catch(e){return ''} }
+function graderUrl(){ try{return localStorage.getItem('grader_url')||'https://ess-grader.nealw.workers.dev/'}catch(e){return 'https://ess-grader.nealw.workers.dev/'} }
 function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(crScope); } }
 function crProg(){ try{return JSON.parse(localStorage.getItem('cw2_cr')||'{}')}catch(e){return {}} }
 function crSaveResult(id,c,m){ const p=crProg(); p[id]={c:c,m:m}; try{localStorage.setItem('cw2_cr',JSON.stringify(p))}catch(e){} }
