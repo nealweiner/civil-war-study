@@ -319,12 +319,6 @@ function home(){
       <span style="font-size:12px;color:#718096">A 32-page illustrated study guide to read or print. Opens in a new tab.</span></div>
       <div style="color:#cbd5e0;font-size:22px">›</div>
     </a>
-    <div class="card" onclick="crHome()" style="cursor:pointer;display:flex;align-items:center;gap:14px;border:2px solid var(--gold);">
-      <div style="font-size:30px;flex-shrink:0">✍️</div>
-      <div style="flex:1"><h3 style="margin:0;font-size:16px;color:#1e3a5f">Analysis &amp; Short-Answer Practice</h3>
-      <span style="font-size:12px;color:#718096">Connect two events, compare, explain cause &amp; effect — Claude grades your reasoning.</span></div>
-      <div style="color:#cbd5e0;font-size:22px">›</div>
-    </div>
     <h3 class="secttitle">📅 Study by Day</h3>`;
   DAYS.forEach(d=>{
     const done=dayProgress(d), tot=d.topics.length, pct=Math.round(done/tot*100);
@@ -360,8 +354,9 @@ function day(n){
         <div class="check ${done?'':'todo'}">${done?'✓':'○'}</div>
       </div>`;
   });
-  html+=`<button class="btn gold block" onclick="startQuiz(${n})">📝 Take the Day ${n} Quiz (${QUESTIONS.filter(q=>q.day===n).length} questions)</button>
-    <button class="btn ghost block" onclick="home()">← All days</button>`;
+  html+=`<button class="btn gold block" onclick="startQuiz(${n})">📝 Take the Day ${n} Quiz (${QUESTIONS.filter(q=>q.day===n).length} questions)</button>`;
+  if(crCountForDay(n)>0) html+=`<button class="btn primary block" onclick="crHome(${n})">✍️ Analysis Practice (${crCountForDay(n)} short-answer)</button>`;
+  html+=`<button class="btn ghost block" onclick="home()">← All days</button>`;
   app.innerHTML=html; window.scrollTo(0,0);
 }
 
@@ -463,59 +458,62 @@ function results(){
 
 /* ---------- ANALYSIS / SHORT-ANSWER (Claude-graded) ---------- */
 const CR_QUESTIONS = [
- {id:'ca1', prompt:`Connect two events: Explain how the Union victory at the Battle of Antietam (September 1862) made it possible for Lincoln to issue the Emancipation Proclamation.`,
+ {id:'ca1', d:2, prompt:`Connect two events: Explain how the Union victory at the Battle of Antietam (September 1862) made it possible for Lincoln to issue the Emancipation Proclamation.`,
   rubric:`Two parts, 1 point each: (1) Antietam was a Union victory that gave Lincoln a moment of strength; (2) so he could issue the Emancipation Proclamation without looking desperate/losing — turning a battlefield win into a political/moral move.`, maxCredit:2,
   sample:`Antietam was the Union win Lincoln had been waiting for. Issuing the Emancipation Proclamation after a victory (instead of a loss) made it look like a bold decision from strength, not a desperate move, so Antietam gave him the right moment to announce it.`},
- {id:'ca2', prompt:`Explain how the Emancipation Proclamation changed the purpose of the war AND helped the Union army.`,
+ {id:'ca2', d:1, prompt:`Explain how the Emancipation Proclamation changed the purpose of the war AND helped the Union army.`,
   rubric:`Two parts, 1 point each: (1) it changed the war's purpose to include ending slavery, not just preserving the Union; (2) it allowed Black men to enlist, adding soldiers/manpower to the Union army.`, maxCredit:2,
   sample:`The Emancipation Proclamation made the war about ending slavery, not just keeping the country together. It also let Black men join the Union army, which added thousands of new soldiers and strengthened the North's forces.`},
- {id:'ca3', prompt:`Take the victories at Gettysburg and Vicksburg (both July 1863) and explain why historians call this the turning point of the war.`,
+ {id:'ca3', d:3, prompt:`Take the victories at Gettysburg and Vicksburg (both July 1863) and explain why historians call this the turning point of the war.`,
   rubric:`Two parts, 1 point each: (1) Gettysburg stopped Lee's invasion of the North and crippled his army; (2) Vicksburg gave the Union control of the Mississippi River, splitting the Confederacy in two. Together they shifted momentum to the North.`, maxCredit:2,
   sample:`At Gettysburg the Union stopped Lee's invasion and wrecked his army so it could never again threaten the North. The very next day Vicksburg fell, giving the Union the whole Mississippi River and cutting the Confederacy in two. Together, these wins turned the momentum toward the North.`},
- {id:'ca4', prompt:`Explain how the First Battle of Bull Run (Manassas) changed what both the North and South expected from the war.`,
+ {id:'ca4', d:1, prompt:`Explain how the First Battle of Bull Run (Manassas) changed what both the North and South expected from the war.`,
   rubric:`Two parts, 1 point each: (1) the Confederate victory shocked the North, which had expected a quick, easy win; (2) it showed both sides the war would be long and bloody, leading them to build bigger armies and prepare for a longer fight.`, maxCredit:2,
   sample:`Many Northerners thought the war would be over fast, but the Confederate victory at Bull Run shocked them. Both sides realized the war would be long and bloody, so they began raising larger armies and preparing for years of fighting instead of weeks.`},
- {id:'ca5', prompt:`Sherman's "March to the Sea" did more than win battles. Connect it to the idea of "total war."`,
+ {id:'ca5', d:3, prompt:`Sherman's "March to the Sea" did more than win battles. Connect it to the idea of "total war."`,
   rubric:`Two parts, 1 point each: (1) Sherman destroyed crops, railroads, factories, and property across Georgia — not just enemy armies; (2) the goal was to break the South's ability and will to keep fighting, which is what "total war" means.`, maxCredit:2,
   sample:`As Sherman marched across Georgia, he burned crops, tore up railroads, and destroyed property, not just enemy troops. The point was to destroy the South's resources and crush its will to fight — that is "total war," aimed at the whole society, not only the army.`},
- {id:'ca6', prompt:`Connect Lincoln's Gettysburg Address to the Declaration of Independence. What deeper meaning did Lincoln give the war?`,
+ {id:'ca6', d:3, prompt:`Connect Lincoln's Gettysburg Address to the Declaration of Independence. What deeper meaning did Lincoln give the war?`,
   rubric:`Two parts, 1 point each: (1) Lincoln echoed the Declaration's idea that "all men are created equal"/the nation's founding ideals; (2) he reframed the war as a test of whether a nation built on those ideals (and democracy) could survive — giving the war a higher purpose.`, maxCredit:2,
   sample:`Lincoln reached back to the Declaration of Independence and its promise that "all men are created equal." He framed the war as a test of whether a nation founded on liberty and equality could survive, giving the fighting a deeper meaning than just winning territory.`},
- {id:'ca7', prompt:`Explain how the North's advantages in industry, railroads, and population were connected to its eventual victory.`,
+ {id:'ca7', d:4, prompt:`Explain how the North's advantages in industry, railroads, and population were connected to its eventual victory.`,
   rubric:`Two parts, 1 point each: (1) the North had far more factories, railroads, and people than the South; (2) this let it produce more weapons/supplies, move them faster, and replace soldiers, wearing the South down over a long war.`, maxCredit:2,
   sample:`The North had many more factories, railroads, and people than the South. That meant it could make more guns and supplies, ship them quickly by rail, and keep replacing soldiers it lost. Over a long war, those advantages slowly wore the South down to defeat.`},
- {id:'ca8', prompt:`Connect two events: Lincoln was assassinated just days after the war ended at Appomattox (April 1865). Explain how his death affected the period that followed (Reconstruction).`,
+ {id:'ca8', d:4, prompt:`Connect two events: Lincoln was assassinated just days after the war ended at Appomattox (April 1865). Explain how his death affected the period that followed (Reconstruction).`,
   rubric:`Two parts, 1 point each: (1) Lincoln was killed right after the South surrendered, before he could lead the rebuilding; (2) his death removed his more lenient/healing plan for the South, leading to a harsher and more divided Reconstruction.`, maxCredit:2,
   sample:`Lincoln was shot just days after Lee surrendered, so he never got to lead the country's rebuilding. He had favored a gentle plan to bring the South back, but with him gone, Reconstruction became harsher and far more bitter and divided.`},
- {id:'ca9', prompt:`Compare the main goal of the North with the main goal of the South at the start of the war.`,
+ {id:'ca9', d:1, prompt:`Compare the main goal of the North with the main goal of the South at the start of the war.`,
   rubric:`Two parts, 1 point each: (1) the North's goal was to preserve the Union / keep the country together; (2) the South's goal was independence — to form its own nation and protect slavery and states' rights.`, maxCredit:2,
   sample:`At the start, the North fought mainly to preserve the Union and keep the country from breaking apart. The South fought for independence — to become its own separate nation where it could protect slavery and states' rights.`},
- {id:'ca10', prompt:`Explain how women on both sides contributed to the war effort, and connect their work to keeping the armies and home front going.`,
+ {id:'ca10', d:2, prompt:`Explain how women on both sides contributed to the war effort, and connect their work to keeping the armies and home front going.`,
   rubric:`Two parts, 1 point each: (1) women served as nurses (e.g., Clara Barton), spies, and ran farms, factories, and households; (2) this kept soldiers cared for and supplied and kept the home front running, directly supporting the war effort.`, maxCredit:2,
   sample:`Women worked as nurses like Clara Barton, served as spies, and ran the farms, factories, and homes while men were away. By caring for the wounded, making supplies, and keeping the home front going, they kept the armies fed, healed, and supported throughout the war.`}
 ];
-let crOrder=[], crIdx=0;
+let crOrder=[], crIdx=0, crScope=null;
 function graderUrl(){ try{return localStorage.getItem('grader_url')||''}catch(e){return ''} }
-function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(); } }
+function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(crScope); } }
 function crProg(){ try{return JSON.parse(localStorage.getItem('cw2_cr')||'{}')}catch(e){return {}} }
 function crSaveResult(id,c,m){ const p=crProg(); p[id]={c:c,m:m}; try{localStorage.setItem('cw2_cr',JSON.stringify(p))}catch(e){} }
-function crResetProg(){ if(confirm('Clear your analysis-question progress and start fresh?')){ try{localStorage.removeItem('cw2_cr')}catch(e){} } crHome(); }
-function crHome(){
-  renderStats();
+function crForDay(d){ return CR_QUESTIONS.map((_,i)=>i).filter(i=>CR_QUESTIONS[i].d===d); }
+function crCountForDay(d){ return crForDay(d).length; }
+function crResetProg(){ if(confirm('Clear your Day '+crScope+' analysis progress and start fresh?')){ const p=crProg(); crForDay(crScope).forEach(i=>{ delete p[CR_QUESTIONS[i].id]; }); try{localStorage.setItem('cw2_cr',JSON.stringify(p))}catch(e){} } crHome(crScope); }
+function crHome(d){
+  crScope=d; renderStats();
   const url=graderUrl();
-  let html=`<div class="card summary"><span class="tag">Analysis Practice</span><h2 style="margin:4px 0 0;color:var(--navy)">✍️ Short-Answer Analysis</h2>
-    <p style="font-size:14px;color:#5a6678">These ask you to <b>think</b>, not just recall — connect two events, compare sides, or explain cause and effect. Claude grades your reasoning (most are worth 2 points) with feedback. Progress is saved on this device.</p></div>`;
+  const dd=DAYS.find(x=>x.n===d);
+  let html=`<div class="card summary"><span class="tag">Day ${d} · Analysis</span><h2 style="margin:4px 0 0;color:var(--navy)">✍️ ${dd?dd.title:''}</h2>
+    <p style="font-size:14px;color:#5a6678">Short-answer analysis for this day — connect two events, compare sides, or explain cause and effect. Claude grades your reasoning (most are worth 2 points) with feedback. Progress is saved on this device.</p></div>`;
   if(!url){
     html+=`<div class="card" style="border:2px solid var(--gold)"><h3 style="margin-top:0;color:#9a6a00">One-time setup</h3>
-      <p style="font-size:14px">A grown-up sets up a tiny free "grader" once (it keeps the API key private). After the setup, paste the grader's web address here. <b>If you already set it up for the Science app, it works here too.</b></p>
+      <p style="font-size:14px">A grown-up sets up a tiny free "grader" once (it keeps the API key private), then pastes its web address here. <b>If you already set it up for the Science app, it works here too.</b></p>
       <button class="btn gold block" onclick="setGraderUrl()">Paste grader URL</button>
-      <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
+      <button class="btn ghost block" onclick="day(${d})">← Back to Day ${d}</button></div>`;
     app.innerHTML=html;window.scrollTo(0,0);return;
   }
-  const p=crProg(), total=CR_QUESTIONS.length;
-  const done=CR_QUESTIONS.filter(q=>p[q.id]), doneCount=done.length;
-  const full=done.filter(q=>p[q.id].c>=p[q.id].m).length, missed=doneCount-full;
-  const left=total-doneCount, pct=Math.round(doneCount/total*100);
+  const p=crProg(), pool=crForDay(d), total=pool.length;
+  const done=pool.filter(i=>p[CR_QUESTIONS[i].id]), doneCount=done.length;
+  const full=done.filter(i=>p[CR_QUESTIONS[i].id].c>=p[CR_QUESTIONS[i].id].m).length, missed=doneCount-full;
+  const left=total-doneCount, pct=total?Math.round(doneCount/total*100):0;
   html+=`<div class="card">
     <div style="display:flex;justify-content:space-between;font-size:13px;color:#5a6678;margin-bottom:6px"><span><b>${doneCount}</b> of ${total} answered</span><span>${full} full marks${missed?' · '+missed+' to improve':''}</span></div>
     <div style="background:#e2e8f0;border-radius:99px;height:12px;overflow:hidden"><div style="background:var(--navy2);height:100%;width:${pct}%;transition:width .4s"></div></div>`;
@@ -528,14 +526,14 @@ function crHome(){
   } else {
     html+=`<p style="text-align:center;margin:14px 0 6px;font-weight:700;color:var(--navy)">🎉 All ${total} answered!</p>`;
     if(missed) html+=`<button class="btn primary block" onclick="crStartMissed()">Redo the ${missed} I should improve</button>`;
-    html+=`<button class="btn gold block" onclick="crResetProg()">Practice all again from scratch</button>`;
+    html+=`<button class="btn gold block" onclick="crResetProg()">Practice all again</button>`;
   }
   html+=`<button class="btn ghost block" onclick="setGraderUrl()">Change grader URL</button>
-      <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
+      <button class="btn ghost block" onclick="day(${d})">← Back to Day ${d}</button></div>`;
   app.innerHTML=html;window.scrollTo(0,0);
 }
-function crStart(){ const p=crProg(); let pool=CR_QUESTIONS.map((_,i)=>i).filter(i=>!p[CR_QUESTIONS[i].id]); if(!pool.length) pool=CR_QUESTIONS.map((_,i)=>i); crOrder=shuffle(pool); crIdx=0; crQuestion(); }
-function crStartMissed(){ const p=crProg(); const pool=CR_QUESTIONS.map((_,i)=>i).filter(i=>p[CR_QUESTIONS[i].id] && p[CR_QUESTIONS[i].id].c<p[CR_QUESTIONS[i].id].m); if(!pool.length){ crHome(); return; } crOrder=shuffle(pool); crIdx=0; crQuestion(); }
+function crStart(){ const p=crProg(); let pool=crForDay(crScope).filter(i=>!p[CR_QUESTIONS[i].id]); if(!pool.length) pool=crForDay(crScope); crOrder=shuffle(pool.slice()); crIdx=0; crQuestion(); }
+function crStartMissed(){ const p=crProg(); const pool=crForDay(crScope).filter(i=>p[CR_QUESTIONS[i].id] && p[CR_QUESTIONS[i].id].c<p[CR_QUESTIONS[i].id].m); if(!pool.length){ crHome(crScope); return; } crOrder=shuffle(pool.slice()); crIdx=0; crQuestion(); }
 function crQuestion(){
   const q=CR_QUESTIONS[crOrder[crIdx]];
   let html=`<div class="card"><div class="qcount">Analysis ${crIdx+1} of ${crOrder.length} · worth ${q.maxCredit} pts</div>
@@ -545,7 +543,7 @@ function crQuestion(){
     <div id="crresult"></div>
     <button class="reveal" onclick="document.getElementById('crsample').classList.add('show');this.style.display='none'">Show a model answer</button>
     <div class="ans" id="crsample">✓ ${q.sample}</div>
-    <button class="btn ghost block" onclick="crHome()" style="margin-top:14px">Quit</button>
+    <button class="btn ghost block" onclick="crHome(crScope)" style="margin-top:14px">Quit</button>
   </div>`;
   app.innerHTML=html;window.scrollTo(0,0);
 }
@@ -568,7 +566,7 @@ async function crGrade(){
     crSaveResult(q.id,got,max);
     btn.style.display='none';
     const nx=document.createElement('button'); nx.className='btn primary block'; nx.textContent=(crIdx<crOrder.length-1)?'Next prompt →':'Done ✓';
-    nx.onclick=function(){ if(crIdx<crOrder.length-1){crIdx++;crQuestion();}else crHome(); };
+    nx.onclick=function(){ if(crIdx<crOrder.length-1){crIdx++;crQuestion();}else crHome(crScope); };
     res.appendChild(nx);
   }catch(e){
     res.innerHTML=`<div class="explain show" style="border-left:4px solid var(--red)">⚠️ Couldn't reach the grader. Check the grader URL (Change grader URL) and your connection.</div>`;
