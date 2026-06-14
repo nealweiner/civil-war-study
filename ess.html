@@ -350,6 +350,12 @@ function home(){
       <span style="font-size:12px;color:#718096">A 30-page illustrated review to read or print. Opens in a new tab.</span></div>
       <div style="color:#cbd5e0;font-size:22px">›</div>
     </a>
+    <div class="card" onclick="crHome()" style="cursor:pointer;display:flex;align-items:center;gap:14px;border:2px solid var(--amber)">
+      <div style="font-size:30px;flex-shrink:0">✍️</div>
+      <div style="flex:1"><h3 style="margin:0;font-size:16px;color:var(--amber)">Written-Answer Practice</h3>
+      <span style="font-size:12px;color:#718096">Type constructed-response answers — Claude grades them like a Regents scorer.</span></div>
+      <div style="color:#cbd5e0;font-size:22px">›</div>
+    </div>
     <h3 class="secttitle">📚 Study by Unit</h3>`;
   UNITS.forEach(u=>{const done=unitProgress(u),tot=u.topics.length,pct=Math.round(done/tot*100);
     html+=`<div class="card daycard" onclick="unit(${u.n})"><div class="dnum">${u.n}</div>
@@ -422,6 +428,94 @@ function results(){let score=0;answers.forEach((a,i)=>{if(a===QZ[i].c)score++});
   QZ.forEach((it,i)=>{const a=answers[i],ok=a===it.c;
     html+=`<div class="ritem ${ok?'ok':'no'}"><span class="icon">${ok?'✅':'❌'}</span>${it.q}<br><b>Answer:</b> ${it.o[it.c]}${!ok?`<br><span style="color:var(--red)">You chose: ${it.o[a]}</span>`:''}<br><span style="color:#5a6b66">${it.e}</span></div>`});
   html+=`</div>`;app.innerHTML=html;window.scrollTo(0,0)}
+/* ---------- CONSTRUCTED RESPONSE (Claude-graded) ---------- */
+const CR_QUESTIONS = [
+ {id:'cr1', prompt:`Explain why igneous rock that cools slowly deep underground forms larger crystals than rock that cools quickly at the surface.`,
+  rubric:`Must connect SLOW cooling to MORE TIME for crystals to grow → LARGER crystals (and/or fast cooling = less time = small/fine/glassy).`, maxCredit:1,
+  sample:`When magma cools slowly underground, there is more time for crystals to grow, so they become large. Lava that cools quickly at the surface gives crystals little time to form, so they stay small or glassy.`},
+ {id:'cr2', prompt:`Using cause and effect, explain how burning fossil fuels leads to global warming.`,
+  rubric:`Must show the chain: burning fossil fuels releases CO₂ (a greenhouse gas) → greenhouse gases trap heat → average global temperature rises.`, maxCredit:1,
+  sample:`Burning fossil fuels releases carbon dioxide, a greenhouse gas. Greenhouse gases trap heat in the atmosphere, so as their amount increases, Earth's average temperature rises.`},
+ {id:'cr3', prompt:`A student says the seasons are caused by Earth being closer to the Sun in summer. Construct an argument explaining why this is incorrect.`,
+  rubric:`Must state seasons are caused by Earth's 23.5° axial TILT (not distance), and that the tilt changes the directness/angle of sunlight and the length of day for each hemisphere.`, maxCredit:1,
+  sample:`The seasons are not caused by distance. Earth's axis is tilted 23.5°. The hemisphere tilted toward the Sun gets more direct sunlight and longer days (summer); the one tilted away gets less direct light and shorter days (winter).`},
+ {id:'cr4', prompt:`Explain how the phases of the Moon are produced.`,
+  rubric:`Must say phases come from the changing positions of the Earth, Moon, and Sun, so we see different amounts of the Moon's sunlit half (cycle ~29.5 days).`, maxCredit:1,
+  sample:`As the Moon orbits Earth, the positions of the Earth, Moon, and Sun change, so we see different amounts of the Moon's lit half. This cycle of phases repeats about every 29.5 days.`},
+ {id:'cr5', prompt:`Earthquake S-waves do not pass through Earth's outer core, but P-waves do. Use this evidence to explain what it tells scientists about the outer core.`,
+  rubric:`Must use that S-waves travel only through SOLIDS while P-waves also travel through liquids; since S-waves don't pass through the outer core, the outer core must be LIQUID.`, maxCredit:1,
+  sample:`S-waves can only travel through solids, while P-waves can also travel through liquids. Because S-waves cannot pass through the outer core but P-waves can, the outer core must be liquid.`},
+ {id:'cr6', prompt:`Explain how melting sea ice creates a positive feedback loop that increases warming.`,
+  rubric:`Must show the loop: melting ice lowers albedo (less reflection) → darker surface absorbs more sunlight/heat → more warming → even more ice melts.`, maxCredit:1,
+  sample:`When sea ice melts, it exposes darker ocean, lowering Earth's albedo. The darker water absorbs more sunlight instead of reflecting it, causing more warming, which melts even more ice — a positive feedback loop.`},
+ {id:'cr7', prompt:`Construct an explanation for how the redshift of distant galaxies supports the Big Bang theory.`,
+  rubric:`Must say light from distant galaxies is shifted to longer (red) wavelengths → galaxies moving away; farther galaxies move faster → the universe is expanding (supporting the Big Bang).`, maxCredit:1,
+  sample:`Light from distant galaxies is stretched toward longer, redder wavelengths, which means the galaxies are moving away. The farther a galaxy is, the faster it moves away, showing the universe is expanding — evidence it began with the Big Bang.`},
+ {id:'cr8', prompt:`Explain why scientists study Moon rocks and meteorites to learn about Earth's earliest history.`,
+  rubric:`Must say Earth's oldest rocks were destroyed/changed by plate tectonics and erosion, while the Moon/meteorites have changed very little, so they preserve a record of the early solar system.`, maxCredit:1,
+  sample:`Most of Earth's oldest rocks were destroyed or changed by plate tectonics and erosion. The Moon and meteorites have barely changed in billions of years, so they preserve a record of the early solar system and early Earth.`}
+];
+let crOrder=[], crIdx=0;
+function graderUrl(){ try{return localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
+function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('ess_grader_url',u.trim())}catch(e){} crHome(); } }
+function crHome(){
+  renderStats();
+  const url=graderUrl();
+  let html=`<div class="card summary"><span class="tag">Written-Answer Practice</span><h2 style="margin:4px 0 0;color:var(--teal)">✍️ Constructed Response</h2>
+    <p style="font-size:14px;color:#5a6b66">About 40% of the real Regents is written answers. Type an answer below and Claude grades it like a Regents scorer — with specific feedback on what would earn full credit.</p></div>`;
+  if(!url){
+    html+=`<div class="card" style="border:2px solid var(--amber)"><h3 style="margin-top:0;color:var(--amber)">One-time setup</h3>
+      <p style="font-size:14px">A grown-up sets up a tiny free "grader" once (it keeps the API key private). After the setup steps, paste the grader's web address here.</p>
+      <button class="btn gold block" onclick="setGraderUrl()">Paste grader URL</button>
+      <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
+    app.innerHTML=html;window.scrollTo(0,0);return;
+  }
+  html+=`<div class="card" style="text-align:center"><p style="margin:0 0 10px">${CR_QUESTIONS.length} written-answer prompts ready.</p>
+      <button class="btn gold block" onclick="crStart()">Start practicing →</button>
+      <button class="btn ghost block" onclick="setGraderUrl()">Change grader URL</button>
+      <button class="btn ghost block" onclick="home()">← Back to home</button></div>`;
+  app.innerHTML=html;window.scrollTo(0,0);
+}
+function crStart(){ crOrder=shuffle(CR_QUESTIONS.map((_,i)=>i)); crIdx=0; crQuestion(); }
+function crQuestion(){
+  const q=CR_QUESTIONS[crOrder[crIdx]];
+  let html=`<div class="card"><div class="qcount">Written Answer ${crIdx+1} of ${crOrder.length}</div>
+    <div class="qtext">${q.prompt}</div>
+    <textarea id="craInput" placeholder="Type your answer…" autocomplete="off" style="width:100%;min-height:120px;padding:12px;font-size:15px;border:2px solid var(--line);border-radius:10px;font-family:inherit;outline:none"></textarea>
+    <button class="btn gold block" id="crsubmit" onclick="crGrade()">Submit for grading</button>
+    <div id="crresult"></div>
+    <button class="reveal" onclick="document.getElementById('crsample').classList.add('show');this.style.display='none'">Show a model answer</button>
+    <div class="ans" id="crsample">✓ ${q.sample}</div>
+    <button class="btn ghost block" onclick="crHome()" style="margin-top:14px">Quit</button>
+  </div>`;
+  app.innerHTML=html;window.scrollTo(0,0);
+}
+async function crGrade(){
+  const q=CR_QUESTIONS[crOrder[crIdx]];
+  const inp=document.getElementById('craInput'); const ans=(inp.value||'').trim();
+  if(ans.length<3){ inp.focus(); return; }
+  const btn=document.getElementById('crsubmit'); btn.textContent='Grading…'; btn.disabled=true;
+  const res=document.getElementById('crresult');
+  res.innerHTML=`<div class="explain show">⏳ Claude is grading your answer…</div>`;
+  try{
+    const r=await fetch(graderUrl(),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q.prompt,rubric:q.rubric,maxCredit:q.maxCredit,studentAnswer:ans})});
+    const d=await r.json();
+    if(d.error){ res.innerHTML=`<div class="explain show" style="border-left:4px solid var(--red)">⚠️ ${d.error}${d.detail?'<br><small>'+(''+d.detail).slice(0,200)+'</small>':''}</div>`; btn.textContent='Try again'; btn.disabled=false; return; }
+    const got=(typeof d.credit==='number')?d.credit:0, max=d.maxCredit||q.maxCredit;
+    const color=d.verdict==='full'?'var(--green)':(d.verdict==='partial'?'var(--amber)':'var(--red)');
+    const miss=(d.missing&&d.missing.length)?`<br><b>For full credit:</b> ${d.missing.join('; ')}`:'';
+    res.innerHTML=`<div class="explain show" style="border-left:4px solid ${color}"><b style="color:${color}">Score: ${got}/${max}</b><br>${d.feedback||''}${miss}</div>`;
+    addXP(got*10,'cr_'+q.id,'Written answer graded!');
+    btn.style.display='none';
+    const nx=document.createElement('button'); nx.className='btn primary block'; nx.textContent=(crIdx<crOrder.length-1)?'Next prompt →':'Done ✓';
+    nx.onclick=function(){ if(crIdx<crOrder.length-1){crIdx++;crQuestion();}else crHome(); };
+    res.appendChild(nx);
+  }catch(e){
+    res.innerHTML=`<div class="explain show" style="border-left:4px solid var(--red)">⚠️ Couldn't reach the grader. Check the grader URL (Change grader URL) and your connection.</div>`;
+    btn.textContent='Try again'; btn.disabled=false;
+  }
+}
+
 home();
 </script>
 </body>
