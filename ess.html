@@ -487,7 +487,7 @@ const CR_QUESTIONS = [
   sample:`Because the orbit is an ellipse, the planet's distance from the Sun changes. When it is closest to the Sun, the Sun's gravity is strongest and the planet moves fastest. When it is farthest away, gravity is weaker and the planet moves slowest.`}
 ];
 let crOrder=[], crIdx=0, crScope=null;
-function graderUrl(){ try{return localStorage.getItem('grader_url')||localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
+function graderUrl(){ try{return localStorage.getItem('grader_url')||localStorage.getItem('ess_grader_url')||'https://ess-grader.nealw.workers.dev/'}catch(e){return 'https://ess-grader.nealw.workers.dev/'} }
 function setGraderUrl(){ const u=prompt('Paste your grader Worker URL (https://...workers.dev):', graderUrl()); if(u!==null){ try{localStorage.setItem('grader_url',u.trim())}catch(e){} crHome(crScope); } }
 function crProg(){ try{return JSON.parse(localStorage.getItem('ess_cr')||'{}')}catch(e){return {}} }
 function crSaveResult(id,c,m){ const p=crProg(); p[id]={c:c,m:m}; try{localStorage.setItem('ess_cr',JSON.stringify(p))}catch(e){} }
