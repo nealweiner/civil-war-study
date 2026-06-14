@@ -453,7 +453,13 @@ const CR_QUESTIONS = [
   sample:`Light from distant galaxies is stretched toward longer, redder wavelengths, which means the galaxies are moving away. The farther a galaxy is, the faster it moves away, showing the universe is expanding — evidence it began with the Big Bang.`},
  {id:'cr8', prompt:`Explain why scientists study Moon rocks and meteorites to learn about Earth's earliest history.`,
   rubric:`Must say Earth's oldest rocks were destroyed/changed by plate tectonics and erosion, while the Moon/meteorites have changed very little, so they preserve a record of the early solar system.`, maxCredit:1,
-  sample:`Most of Earth's oldest rocks were destroyed or changed by plate tectonics and erosion. The Moon and meteorites have barely changed in billions of years, so they preserve a record of the early solar system and early Earth.`}
+  sample:`Most of Earth's oldest rocks were destroyed or changed by plate tectonics and erosion. The Moon and meteorites have barely changed in billions of years, so they preserve a record of the early solar system and early Earth.`},
+ {id:'cr9', prompt:`Explain how convection currents in the mantle cause Earth's tectonic plates to move.`,
+  rubric:`Must say heat (from the core/radioactive decay) makes mantle rock rise, then it cools and sinks, forming convection currents; these currents drag/push the plates above them, moving them.`, maxCredit:1,
+  sample:`Heat from Earth's interior warms the mantle, making the hot rock rise. As it cools near the surface it sinks again, creating convection currents. These slow-moving currents drag the tectonic plates above them, causing the plates to move.`},
+ {id:'cr10', prompt:`A rock contains a radioactive element with a half-life of 1.3 billion years. Explain how a scientist could use this to estimate the rock's age.`,
+  rubric:`Must explain that the radioactive element decays into a stable product at a known rate (half-life = time for half to decay), so by measuring the ratio of remaining element to decay product, the scientist counts how many half-lives have passed and multiplies to find the age.`, maxCredit:1,
+  sample:`The radioactive element decays into a stable product at a steady rate — every half-life (1.3 billion years) half of what remains decays. By measuring the ratio of leftover radioactive element to its decay product, the scientist figures out how many half-lives have passed and multiplies by 1.3 billion years to estimate the rock's age.`}
 ];
 let crOrder=[], crIdx=0;
 function graderUrl(){ try{return localStorage.getItem('ess_grader_url')||''}catch(e){return ''} }
