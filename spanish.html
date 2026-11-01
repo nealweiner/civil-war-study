@@ -165,12 +165,54 @@
     <p class="date">Useful for Part 2 — answer in full sentences: <i>Me gusta tomar el desayuno a las siete. En mi casa, el desayuno típico es…</i></p>
   </div>
   <div class="card">
-    <h2 style="margin-top:0">Cierto o Falso — how to fix a false one</h2>
+    <h2 style="margin-top:0">Reading guide: "Desayunos exquisitos"</h2>
+    <p class="date">Summarized in English, organized the way the reading is. Read the real text first, then use this to check you understood it.</p>
+    <p><b>Intro:</b> Breakfasts vary across the Spanish-speaking world (coffee, chocolate, mate, eggs, fruit, cheese, even rice and broth). Many doctors call it the most important meal of the day.</p>
+    <p><b>Las bebidas:</b></p>
+    <table class="idx">
+      <tr><td>café</td><td>"king" of breakfast drinks. Drunk almost everywhere, e.g. Spain, Colombia, Costa Rica, and Cuba, where it is very sweet.</td></tr>
+      <tr><td>chocolate</td><td>Popular in Mexico, Colombia, Guatemala. Dark or with milk.</td></tr>
+      <tr><td>mate</td><td>Argentina, Paraguay, Uruguay.</td></tr>
+      <tr><td>atole</td><td>Mexico. A pre-Hispanic drink of corn cooked in water with spices like cinnamon and vanilla.</td></tr>
+    </table>
+    <p><b>La harina:</b> if coffee is the king, flour (wheat or corn) is the "queen" of breakfast.</p>
+    <table class="idx">
+      <tr><td>pan</td><td>Eaten everywhere.</td></tr>
+      <tr><td>arepa</td><td>A must in Colombia and Venezuela. A corn cake, plain, topped with butter or cheese, or stuffed.</td></tr>
+      <tr><td>pupusas / gorditas</td><td>Central America and Mexico. Similar to the arepa.</td></tr>
+      <tr><td>tamales</td><td>Mexico is their "cradle." Corn dough, stuffed and wrapped in leaves. Sweet or savory. Also popular in Central America, the Caribbean, parts of South America, and even Miami.</td></tr>
+    </table>
+    <p><b>Otras opciones:</b></p>
+    <table class="idx">
+      <tr><td>Ecuador (coast)</td><td>Fish and seafood.</td></tr>
+      <tr><td>El Salvador</td><td>Ground and fried beans (frijoles).</td></tr>
+      <tr><td>Nicaragua, Costa Rica</td><td><b>gallo pinto</b>, rice and beans. Same dish as cultura #24!</td></tr>
+      <tr><td>Colombia (cold areas)</td><td><b>caldo de costilla</b>, a rib broth. Some eat <b>changua</b>, a broth of milk, egg, cheese and cilantro.</td></tr>
+    </table>
+    <p><b>Así se dice — same food, different words:</b></p>
+    <table class="idx">
+      <tr><td>la banana</td><td>el banano (Col.), el cambur (Ven.), el guineo (Nic.), el plátano</td></tr>
+      <tr><td>el maíz</td><td>el choclo (Amér. S.), el elote (Méx.), el jojoto (Ven.), la mazorca (Esp.)</td></tr>
+      <tr><td>los frijoles</td><td>las caraotas (Ven.), los porotos (Amér. S.), las habichuelas (P.R.)</td></tr>
+      <tr><td>el melocotón</td><td>el durazno (Méx.)</td></tr>
+      <tr><td>el tomate</td><td>el jitomate (Méx.)</td></tr>
+    </table>
+    <p class="voc">📌 caldo: broth · rey: king · reina: queen · oscuro: dark · cocida: boiled · canela: cinnamon · harina: flour · torta: cake · rellena: stuffed · cuna: cradle · masa: dough · envuelta: wrapped · salados: savory · molidos: ground · costilla: rib</p>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Practice: Cierto o Falso</h2>
+    <p class="date">These are practice statements, not the ones in the homework. Decide, and if it's false, say how to fix it. Then check.</p>
+    <div id="cf"></div>
+    <div class="row"><button class="btn ghost" id="cfnew">🔀 New set</button></div>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">How to fix a false one</h2>
     <ul>
-      <li>Find the sentence in the reading that the statement is about.</li>
+      <li>Find the paragraph the statement is about: Las bebidas, La harina, or Otras opciones.</li>
       <li>Rewrite the statement so it matches the reading, changing only the wrong part.</li>
-      <li>Example: <i>Falso — Los españoles <s>no</s> comen pan en el desayuno.</i> → <i>Los españoles comen pan con tomate en el desayuno.</i></li>
+      <li>Example: <i>Falso: El mate es popular en México.</i> → <i>El mate es popular en Argentina, Paraguay y Uruguay.</i></li>
     </ul>
+    <p class="date">Note: the Ferran Adrià perfil and the actividades aren't in this PDF. They're in the class packet/book.</p>
   </div>
   <div class="card">
     <h2 style="margin-top:0">Coming up</h2>
@@ -323,6 +365,39 @@ function renderNb(){
   document.querySelectorAll('#nlist input').forEach(i=>i.onchange=()=>{done[i.dataset.n]=i.checked;store.set('esp:nb',done);renderNb()});
 }
 renderNb();
+
+// reading cierto/falso practice: [statement, true?, fix]
+const CF=[
+["El café es la bebida más popular para acompañar el desayuno.",true,""],
+["En Cuba, el café se prepara sin azúcar.",false,"En Cuba, el café se prepara con mucho azúcar."],
+["El chocolate es popular en México, Colombia y Guatemala.",true,""],
+["Muchos argentinos toman atole en el desayuno.",false,"Muchos argentinos toman mate. El atole es de México."],
+["El atole es una bebida de maíz con canela y vainilla.",true,""],
+["El café es la reina del desayuno y la harina es el rey.",false,"El café es el rey y la harina es la reina."],
+["La arepa es indispensable en Colombia y Venezuela.",true,""],
+["La arepa es una torta de trigo.",false,"La arepa es una torta de maíz."],
+["Las pupusas y las gorditas son similares a la arepa.",true,""],
+["España es la cuna de los tamales.",false,"México es la cuna de los tamales."],
+["Los tamales siempre son dulces.",false,"Los tamales pueden ser dulces o salados."],
+["Los tamales son populares en ciudades como Miami.",true,""],
+["En la costa de Ecuador, son típicos los desayunos de pescados y mariscos.",true,""],
+["En El Salvador es común desayunar con frijoles molidos y fritos.",true,""],
+["El gallo pinto es una mezcla de arroz y pollo.",false,"El gallo pinto es una mezcla de arroz y frijoles."],
+["El gallo pinto es típico de Nicaragua y Costa Rica.",true,""],
+["El caldo de costilla es popular en las zonas calientes de Colombia.",false,"Es popular en las zonas frías de Colombia."],
+["La changua es un caldo de leche, huevo, queso y cilantro.",true,""],
+["En México, \"elote\" significa maíz.",true,""],
+["En Venezuela, \"caraotas\" significa bananas.",false,"En Venezuela, \"caraotas\" significa frijoles (la banana es \"cambur\")."]
+];
+function renderCF(){
+  const set=shuf(CF).slice(0,8);
+  $('#cf').innerHTML=set.map((s,i)=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div>${i+1}. ${esc(s[0])}</div>
+   <div class="row"><button class="opt" style="width:auto;margin:0" data-i="${i}" data-a="1">Cierto</button><button class="opt" style="width:auto;margin:0" data-i="${i}" data-a="0">Falso</button></div><div class="fb" id="cff${i}"></div></div>`).join('');
+  document.querySelectorAll('#cf .opt').forEach(b=>b.onclick=()=>{const i=+b.dataset.i,s=set[i],f=$('#cff'+i); if(f.dataset.done)return; f.dataset.done=1;
+    const ok=(b.dataset.a==='1')===s[1]; b.classList.add(ok?'ok':'bad');
+    f.innerHTML=(ok?'✅ ':'❌ ')+(s[1]?'Cierto.':'Falso. <b>Fix:</b> <i>'+esc(s[2])+'</i>');});
+}
+$('#cfnew').onclick=renderCF; renderCF();
 
 // tarea checklist
 const T=["Read \"Desayunos Exquisitos\" (read it twice)","Actividades Part 1: Cierto o Falso — and FIX the false ones","Part 2: answer the questions about yourself (no interview needed)","Part 3: skip it — don't do it","Perfil (Ferran Adrià): answer the three questions at the bottom in your notebook"];
