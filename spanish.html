@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cultura Diaria Review</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--c:#c0392b;--ink:#1a202c;--mute:#5a6678;--bg:#fff8f0;--card:#fff;--line:#eadfd2;--ok:#1f7a4d;--bad:#b3261e}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  header{background:linear-gradient(135deg,#c0392b,#e67e22);color:#fff;padding:22px 16px 14px;text-align:center}
+  header h1{margin:0;font-size:24px}
+  header p{margin:6px 0 0;font-size:13.5px;opacity:.92}
+  header a{color:#fff;font-size:13px;opacity:.85}
+  nav{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  nav button{flex:0 0 auto;border:0;background:#f3ebe1;color:var(--ink);font-weight:700;font-size:14px;padding:9px 13px;border-radius:999px;cursor:pointer}
+  nav button.on{background:var(--c);color:#fff}
+  .wrap{max-width:720px;margin:0 auto;padding:14px 16px 50px}
+  .banner{background:#fff;border-left:5px solid var(--c);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  .card{background:var(--card);border-radius:14px;padding:14px 15px;margin:10px 0;box-shadow:0 3px 12px rgba(0,0,0,.07);border:1px solid var(--line)}
+  .num{display:inline-block;background:var(--c);color:#fff;font-weight:800;border-radius:8px;padding:2px 9px;font-size:13px;margin-right:6px}
+  .date{color:var(--mute);font-size:12.5px}
+  .tag{display:inline-block;font-size:11.5px;font-weight:700;color:#7a4b12;background:#fbe7cf;border-radius:6px;padding:2px 7px;margin-left:6px}
+  .es{font-size:16px;line-height:1.5;margin:8px 0 6px}
+  .en{font-size:14.5px;line-height:1.5;color:#2d3a4f;background:#f6f8fb;border-radius:8px;padding:8px 10px}
+  .en.hide{filter:blur(6px);cursor:pointer;user-select:none}
+  .voc{font-size:12.5px;color:var(--mute);margin-top:6px}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  .btn{border:0;border-radius:10px;padding:11px 15px;font-weight:700;font-size:15px;cursor:pointer;background:var(--c);color:#fff}
+  .btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+  .btn:disabled{opacity:.4}
+  label.tog{font-size:14px;display:flex;align-items:center;gap:6px}
+  .flash{min-height:220px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer}
+  .flash .big{font-size:19px;line-height:1.45}
+  .opt{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;margin:7px 0;font-size:15px;cursor:pointer;color:var(--ink)}
+  .opt.ok{border-color:var(--ok);background:#e8f5ee}
+  .opt.bad{border-color:var(--bad);background:#fdecea}
+  .fb{font-size:14px;margin-top:8px;line-height:1.5}
+  .bar{height:8px;background:#f0e4d6;border-radius:9px;overflow:hidden;margin:6px 0 2px}
+  .bar i{display:block;height:100%;background:var(--c);width:0}
+  .chk{display:flex;gap:10px;align-items:flex-start;padding:9px 4px;border-bottom:1px solid var(--line);font-size:14.5px}
+  .chk input{width:22px;height:22px;flex:0 0 auto;margin-top:1px}
+  table.idx{width:100%;border-collapse:collapse;font-size:14px}
+  table.idx td{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.idx td:first-child{font-weight:700;white-space:nowrap}
+  h2{font-size:18px;margin:16px 0 6px}
+  ul{padding-left:20px;line-height:1.6}
+  .hidden{display:none}
+  #print{display:none}
+  @media print{
+    body{background:#fff;color:#000;font-family:Georgia,"Times New Roman",serif}
+    header,nav,.wrap{display:none!important}
+    #print{display:block!important;font-size:10.5pt;line-height:1.35}
+    #print h1{font-size:15pt;margin:0 0 2pt}
+    #print .p{border-bottom:1px solid #000;padding:4pt 0;page-break-inside:avoid}
+    #print .p b{font-family:Arial,sans-serif}
+    #print .e{font-style:italic}
+    *{color:#000!important;background:#fff!important;box-shadow:none!important}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🇬🇹🇭🇳🇸🇻🇳🇮 Cultura Diaria</h1>
+  <p>Prueba de cultura — <b>lunes 2 de noviembre</b> · open notes · culturas #1–#24</p>
+  <a href="index.html">← Study Hub</a>
+</header>
+<nav id="nav">
+  <button data-v="study" class="on">📖 Estudiar</button>
+  <button data-v="flash">🃏 Tarjetas</button>
+  <button data-v="quiz">✅ Práctica</button>
+  <button data-v="find">🔎 ¿Dónde está?</button>
+  <button data-v="notes">📒 Cuaderno</button>
+  <button data-v="tarea">📝 Tarea</button>
+</nav>
+<div class="wrap">
+
+<!-- STUDY -->
+<section id="v-study">
+  <div class="banner">The quiz is <b>open notes</b>: you need all 24 culturas written in your notebook <b>in Spanish and English</b>. Use <b>📒 Cuaderno</b> to check nothing is missing, then practice finding facts fast.</div>
+  <div class="row"><label class="tog"><input type="checkbox" id="hideEn"> Hide English (tap to reveal)</label></div>
+  <div id="list"></div>
+</section>
+
+<!-- FLASH -->
+<section id="v-flash" class="hidden">
+  <div class="row">
+    <label class="tog"><input type="radio" name="fd" value="es" checked> Spanish → English</label>
+    <label class="tog"><input type="radio" name="fd" value="en"> English → Spanish</label>
+  </div>
+  <div class="card flash" id="fcard"></div>
+  <div class="row"><button class="btn ghost" id="fprev">◀</button><button class="btn" id="fflip">Flip</button><button class="btn ghost" id="fnext">▶</button><button class="btn ghost" id="fshuf">🔀</button></div>
+  <div class="date" id="fpos"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="v-quiz" class="hidden">
+  <div class="banner">20 questions, shuffled, in Spanish and English — like the real quiz. Each answer tells you which cultura it came from.</div>
+  <div id="qbox"></div>
+</section>
+
+<!-- FIND -->
+<section id="v-find" class="hidden">
+  <div class="banner">On an open-notes quiz, speed comes from knowing <b>where</b> each fact lives. Topic index:</div>
+  <table class="idx" id="idx"></table>
+  <h2>Speed drill</h2>
+  <p class="date">Read the fact, then name the cultura number before revealing.</p>
+  <div class="card" id="drill"></div>
+  <div class="row"><button class="btn" id="dshow">Show #</button><button class="btn ghost" id="dnext">Next</button></div>
+</section>
+
+<!-- NOTES -->
+<section id="v-notes" class="hidden">
+  <div class="banner">Tick each one once it is in your notebook <b>with both the Spanish and the English</b>. The box at the bottom prints a black-and-white copy of all 24 if any are missing.</div>
+  <div class="bar"><i id="nbar"></i></div><div class="date" id="ncount"></div>
+  <div id="nlist"></div>
+  <div class="row"><button class="btn" onclick="window.print()">🖨️ Print all 24 (B&amp;W)</button></div>
+</section>
+
+<!-- TAREA -->
+<section id="v-tarea" class="hidden">
+  <div class="card">
+    <h2 style="margin-top:0">Tarea: Comprensión de lectura — due Monday 11/2</h2>
+    <p>Reading: <b>"Desayunos Exquisitos"</b> and the perfil <b>"Ferran Adrià: arte en la cocina"</b> (PDF in Google Classroom).</p>
+    <div id="tchk"></div>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Antes de leer (warm-up from class)</h2>
+    <ul>
+      <li>¿Te gusta tomar el desayuno?</li>
+      <li>¿A qué hora comes el desayuno?</li>
+      <li>¿Cómo es el desayuno típico en tu casa?</li>
+      <li>¿Cómo crees que es el desayuno en los países hispanos?</li>
+    </ul>
+    <p class="date">Useful for Part 2 — answer in full sentences: <i>Me gusta tomar el desayuno a las siete. En mi casa, el desayuno típico es…</i></p>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Cierto o Falso — how to fix a false one</h2>
+    <ul>
+      <li>Find the sentence in the reading that the statement is about.</li>
+      <li>Rewrite the statement so it matches the reading, changing only the wrong part.</li>
+      <li>Example: <i>Falso — Los españoles <s>no</s> comen pan en el desayuno.</i> → <i>Los españoles comen pan con tomate en el desayuno.</i></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Coming up</h2>
+    <ul><li><b>Viernes 6 de noviembre:</b> quiz on stem-changing verbs (e→ie, o→ue, e→i).</li></ul>
+  </div>
+</section>
+
+</div>
+
+<div id="print"></div>
+
+<script>
+const C=[
+{n:1,d:"9/22",t:"Hispanic Heritage",es:"La Semana de la Herencia Hispana empezó en 1968 y fue extendida a un mes entero de celebraciones por el Presidente Reagan en 1988.",en:"Hispanic Heritage Week began in 1968 and was extended to a whole month of celebrations by President Reagan in 1988.",v:"empezó: started · 1968: mil novecientos sesenta y ocho · 1988: mil novecientos ochenta y ocho"},
+{n:2,d:"9/23",t:"Hispanic Heritage",es:"El 15 de septiembre fue escogido como el punto de inicio de la celebración porque esta fecha es el aniversario de la independencia de cinco países de Latinoamérica: Costa Rica, El Salvador, Guatemala, Honduras y Nicaragua. Ellos declararon su independencia de España en 1821.",en:"September 15 was chosen as the starting point of the celebration because it is the anniversary of the independence of five Latin American countries: Costa Rica, El Salvador, Guatemala, Honduras and Nicaragua. They declared independence from Spain in 1821.",v:"escogido: chosen · inicio: start · 1821: mil ochocientos veintiuno"},
+{n:3,d:"9/24",t:"Hispanic Heritage",es:"El propósito del Mes de la Herencia Hispana es reconocer las contribuciones de los hispanoamericanos a los Estados Unidos y celebrar su herencia y cultura.",en:"The purpose of Hispanic Heritage Month is to recognize the contributions of Hispanic Americans to the United States and to celebrate their heritage and culture.",v:"reconocer: recognize"},
+{n:4,d:"9/29",t:"Hispanic Heritage",es:"El Mes de la Herencia Hispana se celebra cada año entre el 15 de septiembre y el 15 de octubre.",en:"Hispanic Heritage Month is celebrated every year between September 15 and October 15.",v:""},
+{n:5,d:"9/30",t:"Latino vs Hispano",es:"¿Latino o hispano? \"Hispano\" se refiere al idioma; \"latino\" se refiere a la geografía. Un español: hispano, no latino. Un brasileño: latino, no hispano. Un mexicano: hispano y latino.",en:"Latino or Hispanic? \"Hispanic\" refers to language; \"Latino\" refers to geography. A Spaniard speaks Spanish but isn't from Latin America → Hispanic, not Latino. A Brazilian is from Latin America but speaks Portuguese → Latino, not Hispanic. A Mexican → both.",v:""},
+{n:6,d:"10/1",t:"El Salvador",es:"El Salvador, cuya capital es San Salvador, está ubicado en Centroamérica. Está al este de Guatemala y al sur de Honduras.",en:"El Salvador, whose capital is San Salvador, is located in Central America. It is east of Guatemala and south of Honduras.",v:"cuya: whose · ubicado: located"},
+{n:7,d:"10/5",t:"El Salvador",es:"El Salvador fue nombrado en referencia a la palabra española Salvador, \"the Savior\", en honor a Jesucristo.",en:"El Salvador was named after the Spanish word Salvador, \"the Savior,\" in honor of Jesus Christ.",v:"fue: was"},
+{n:8,d:"10/6",t:"El Salvador",es:"San Salvador es la segunda ciudad más grande en Centroamérica (después de la Ciudad de Guatemala) con una población de 2.4 millones de habitantes.",en:"San Salvador is the second-largest city in Central America (after Guatemala City), with a population of 2.4 million inhabitants.",v:"población: population"},
+{n:9,d:"10/7",t:"El Salvador",es:"Aunque El Salvador tiene una población grande, es el país más pequeño de Centroamérica. Es aproximadamente del tamaño de Massachusetts.",en:"Although El Salvador has a large population, it is the smallest country in Central America. It is about the size of Massachusetts.",v:"aunque: although · tamaño: size"},
+{n:10,d:"10/8",t:"El Salvador",es:"El café es el mayor producto de exportación de El Salvador.",en:"Coffee is El Salvador's main export product.",v:"mayor: main"},
+{n:11,d:"10/9",t:"Guatemala",es:"Guatemala, cuya capital es Ciudad de Guatemala, es el país con más habitantes en Centroamérica.",en:"Guatemala, whose capital is Guatemala City, is the country with the most inhabitants in Central America.",v:""},
+{n:12,d:"10/13",t:"Guatemala",es:"Aunque el español es el idioma oficial, no es hablado universalmente entre la población indígena. 21 idiomas mayas distintos se hablan a través de Guatemala.",en:"Although Spanish is the official language, it is not spoken by all of the indigenous population. 21 different Mayan languages are spoken throughout Guatemala.",v:"distintos: different · a través de: throughout"},
+{n:13,d:"10/14",t:"Guatemala",es:"Guatemala fue cuna de la civilización maya en los años 2000 a.C. Sus ruinas son ahora atracción turística en Guatemala.",en:"Guatemala was the home (cradle) of the Maya civilization around 2000 B.C. Its ruins are now a tourist attraction in Guatemala.",v:"fue: was · cuna: home"},
+{n:14,d:"10/15",t:"Flags",es:"Las dos bandas azules en la bandera de Guatemala (y en las banderas de la mayoría de los otros países en Centroamérica) representan ambos océanos, Atlántico y Pacífico, que rodean a Centroamérica.",en:"The two blue stripes on Guatemala's flag (and on the flags of most other Central American countries) represent both oceans, the Atlantic and the Pacific, that surround Central America.",v:"mayoría: most · ambos: both · rodean: surround"},
+{n:15,d:"10/16",t:"Guatemala",es:"El quetzal, el cual significa \"pluma de cola grande y brillante\", es el nombre del ave símbolo de Guatemala. El quetzal también es la moneda oficial de Guatemala.",en:"The quetzal, which means \"large, bright tail feather,\" is the name of Guatemala's national bird. The quetzal is also Guatemala's official currency.",v:"pluma: feather · cola: tail · brillante: bright · ave: bird"},
+{n:16,d:"10/19",t:"Honduras",es:"Honduras, cuya capital es Tegucigalpa, está ubicado en Centroamérica entre Guatemala y Nicaragua y al noreste de El Salvador.",en:"Honduras, whose capital is Tegucigalpa, is located in Central America between Guatemala and Nicaragua and northeast of El Salvador.",v:""},
+{n:17,d:"10/20",t:"Flags",es:"Las cinco estrellas en la bandera de Honduras representan los cinco países que pertenecieron a la Unión Centroamericana (Guatemala, El Salvador, Honduras, Nicaragua y Costa Rica).",en:"The five stars on the Honduran flag represent the five countries that belonged to the Central American Union (Guatemala, El Salvador, Honduras, Nicaragua and Costa Rica).",v:"estrellas: stars · pertenecieron: belonged"},
+{n:18,d:"10/21",t:"Honduras",es:"América Ferrera, actriz ganadora de un Emmy por \"Ugly Betty\" y The Sisterhood of the Traveling Pants, nació en los Estados Unidos de padres hondureños.",en:"America Ferrera, Emmy-winning actress for \"Ugly Betty\" and The Sisterhood of the Traveling Pants, was born in the United States to Honduran parents.",v:"ganadora: winner · nació: was born"},
+{n:19,d:"10/22",t:"Honduras",es:"Las famosas ruinas de Copán, de la civilización maya, están ubicadas en Honduras.",en:"The famous ruins of Copán, from the Maya civilization, are located in Honduras.",v:""},
+{n:20,d:"10/26",t:"Nicaragua",es:"Nicaragua, cuya capital es Managua, está ubicado en Centroamérica entre Honduras y Costa Rica.",en:"Nicaragua, whose capital is Managua, is located in Central America between Honduras and Costa Rica.",v:""},
+{n:21,d:"10/27",t:"Flags",es:"La bandera de Nicaragua tiene dos bandas azules que representan los dos océanos que rodean al país, un triángulo (igualdad), un arcoíris (paz), un sombrero rojo (libertad) y cinco volcanes (la hermandad entre los 5 países de Centroamérica).",en:"Nicaragua's flag has two blue stripes for the two oceans around the country, a triangle (equality), a rainbow (peace), a red hat (liberty) and five volcanoes (the brotherhood of the 5 Central American countries).",v:"igualdad: equality · arcoíris: rainbow · sombrero: hat · hermandad: fraternity"},
+{n:22,d:"10/28",t:"Nicaragua",es:"Nicaragua es el hogar de los dos lagos más grandes en Centroamérica: el lago Managua y el lago Nicaragua.",en:"Nicaragua is home to the two largest lakes in Central America: Lake Managua and Lake Nicaragua.",v:"hogar: home"},
+{n:23,d:"10/29",t:"Nicaragua",es:"Nicaragua fue el primer país en Centroamérica en elegir una mujer como presidente. Violeta Chamorro sirvió como presidente desde 1990 hasta 1997.",en:"Nicaragua was the first country in Central America to elect a woman as president. Violeta Chamorro served as president from 1990 to 1997.",v:"fue: was · sirvió: served · 1990: mil novecientos noventa · 1997: mil novecientos noventa y siete"},
+{n:24,d:"10/30",t:"Nicaragua",es:"Gallo pinto (que significa \"spotted rooster\") es el plato típico de Nicaragua. Consiste en arroz con frijoles fritos con cilantro, cebolla y pimientos.",en:"Gallo pinto (meaning \"spotted rooster\") is Nicaragua's typical dish. It is rice with fried beans, cilantro, onion and bell peppers.",v:"cebolla: onion · pimientos: bell peppers"}
+];
+
+// [question, correct, wrong..., cultura#]
+const Q=[
+["¿En qué año empezó la Semana de la Herencia Hispana?","1968","1988","1821","1990",1],
+["Which president extended Hispanic Heritage Week to a whole month?","Reagan","Lincoln","Kennedy","Carter",1],
+["¿Por qué empieza la celebración el 15 de septiembre?","Es el aniversario de la independencia de cinco países centroamericanos","Es el cumpleaños de Reagan","Es el Día de la Raza","Es el fin del verano",2],
+["The five countries that declared independence from Spain in 1821 are Costa Rica, El Salvador, Guatemala, Honduras and…","Nicaragua","Panamá","México","Belice",2],
+["What is the purpose of Hispanic Heritage Month?","To recognize Hispanic Americans' contributions to the U.S. and celebrate their heritage","To celebrate Spain's independence","To learn Spanish","To celebrate Columbus",3],
+["El Mes de la Herencia Hispana se celebra entre…","el 15 de septiembre y el 15 de octubre","el 1 y el 30 de septiembre","el 15 de octubre y el 15 de noviembre","el 5 de mayo y el 5 de junio",4],
+["\"Hispanic\" refers to ___ and \"Latino\" refers to ___.","language; geography","geography; language","religion; language","food; music",5],
+["A Brazilian is…","Latino but not Hispanic","Hispanic but not Latino","both","neither",5],
+["A Spaniard (person from Spain) is…","Hispanic but not Latino","Latino but not Hispanic","both","neither",5],
+["¿Cuál es la capital de El Salvador?","San Salvador","Tegucigalpa","Managua","Ciudad de Guatemala",6],
+["El Salvador está al este de ___ y al sur de ___.","Guatemala; Honduras","Honduras; Nicaragua","Nicaragua; Guatemala","Costa Rica; Honduras",6],
+["What does \"Salvador\" mean, and who is it in honor of?","\"The Savior\" — Jesus Christ","\"The Sun\" — a Maya god","\"The Saint\" — a king","\"The Sea\" — the Pacific",7],
+["San Salvador es la ___ ciudad más grande de Centroamérica.","segunda","primera","tercera","más pequeña",8],
+["How many people live in San Salvador?","2.4 million","24 million","240,000","1 million",8],
+["¿Cuál es el país más pequeño de Centroamérica?","El Salvador","Guatemala","Honduras","Nicaragua",9],
+["El Salvador is about the size of which U.S. state?","Massachusetts","Texas","New York","Florida",9],
+["¿Cuál es el mayor producto de exportación de El Salvador?","el café","el azúcar","los plátanos","el chocolate",10],
+["Which Central American country has the most inhabitants?","Guatemala","El Salvador","Honduras","Nicaragua",11],
+["¿Cuántos idiomas mayas se hablan en Guatemala?","21","5","12","2",12],
+["Guatemala was the cradle (home) of which civilization around 2000 B.C.?","the Maya","the Aztec","the Inca","the Olmec",13],
+["Las dos bandas azules en la bandera de Guatemala representan…","los océanos Atlántico y Pacífico","el cielo y el agua","dos lagos","la paz y la libertad",14],
+["The quetzal is Guatemala's national bird and also its…","official currency","national dish","capital city","main export",15],
+["\"Quetzal\" significa…","pluma de cola grande y brillante","pájaro verde","dinero de oro","hermano del sol",15],
+["¿Cuál es la capital de Honduras?","Tegucigalpa","Managua","San Salvador","San José",16],
+["Honduras is between Guatemala and ___, and northeast of ___.","Nicaragua; El Salvador","El Salvador; Nicaragua","Costa Rica; Guatemala","México; Belice",16],
+["Las cinco estrellas en la bandera de Honduras representan…","los cinco países de la Unión Centroamericana","los cinco volcanes","cinco presidentes","cinco idiomas",17],
+["America Ferrera was born in the U.S. to parents from…","Honduras","Guatemala","Nicaragua","El Salvador",18],
+["America Ferrera won an Emmy for…","Ugly Betty","Coco","The Office","Encanto",18],
+["Las famosas ruinas mayas de Copán están en…","Honduras","Guatemala","Nicaragua","El Salvador",19],
+["¿Cuál es la capital de Nicaragua?","Managua","Tegucigalpa","San Salvador","San José",20],
+["Nicaragua está entre…","Honduras y Costa Rica","Guatemala y Honduras","El Salvador y Panamá","México y Guatemala",20],
+["On Nicaragua's flag, the rainbow (arcoíris) means…","peace","equality","liberty","brotherhood",21],
+["On Nicaragua's flag, the red hat (sombrero rojo) means…","liberty","peace","equality","the oceans",21],
+["Los cinco volcanes en la bandera de Nicaragua representan…","la hermandad entre los 5 países de Centroamérica","las cinco ciudades","los cinco lagos","cinco presidentes",21],
+["The two largest lakes in Central America are…","Lake Managua and Lake Nicaragua","Lake Copán and Lake Managua","Lake Titicaca and Lake Nicaragua","Lake Atitlán and Lake Copán",22],
+["¿Quién fue la primera mujer presidente en Centroamérica?","Violeta Chamorro","America Ferrera","Rigoberta Menchú","Frida Kahlo",23],
+["Violeta Chamorro served as president from…","1990 to 1997","1968 to 1988","1821 to 1830","2000 to 2007",23],
+["El gallo pinto es el plato típico de…","Nicaragua","Honduras","Guatemala","El Salvador",24],
+["What is gallo pinto made of?","Rice and fried beans with cilantro, onion and peppers","Corn tortillas with cheese","Chicken and potatoes","Plantains and fish",24],
+["\"Gallo pinto\" means…","spotted rooster","red chicken","painted beans","little rice",24]
+];
+
+const $=s=>document.querySelector(s), esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+// nav
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  $('#v-'+b.dataset.v).classList.remove('hidden'); window.scrollTo(0,0);
+});
+
+// study
+function renderList(){
+  const hide=$('#hideEn').checked;
+  $('#list').innerHTML=C.map(c=>`<div class="card"><span class="num">#${c.n}</span><span class="date">${c.d}</span><span class="tag">${c.t}</span>
+  <div class="es">${esc(c.es)}</div><div class="en ${hide?'hide':''}" onclick="this.classList.remove('hide')">${esc(c.en)}</div>${c.v?`<div class="voc">📌 ${esc(c.v)}</div>`:''}</div>`).join('');
+}
+$('#hideEn').onchange=renderList; renderList();
+
+// flash
+let fo=C.slice(), fi=0, fflip=false;
+function fdir(){return document.querySelector('input[name=fd]:checked').value}
+function fshow(){const c=fo[fi], d=fdir(); const front=d==='es'?c.es:c.en, back=d==='es'?c.en:c.es;
+  $('#fcard').innerHTML=`<div><span class="num">#${c.n}</span><span class="date">${c.d}</span></div><div class="big" style="margin-top:10px">${esc(fflip?back:front)}</div>${fflip&&c.v?`<div class="voc">📌 ${esc(c.v)}</div>`:''}<div class="date" style="margin-top:10px">${fflip?'':'tap to flip'}</div>`;
+  $('#fpos').textContent=`${fi+1} / ${fo.length}`;}
+$('#fcard').onclick=$('#fflip').onclick=()=>{fflip=!fflip;fshow()};
+$('#fnext').onclick=()=>{fi=(fi+1)%fo.length;fflip=false;fshow()};
+$('#fprev').onclick=()=>{fi=(fi-1+fo.length)%fo.length;fflip=false;fshow()};
+$('#fshuf').onclick=()=>{fo=shuf(C);fi=0;fflip=false;fshow()};
+document.querySelectorAll('input[name=fd]').forEach(r=>r.onchange=()=>{fflip=false;fshow()});
+fshow();
+
+// quiz
+let qs=[], qi=0, score=0, misses=[];
+function qstart(){qs=shuf(Q).slice(0,20);qi=0;score=0;misses=[];qshow()}
+function qshow(){
+  if(qi>=qs.length){const best=store.get('esp:best',0); if(score>best)store.set('esp:best',score);
+    $('#qbox').innerHTML=`<div class="card"><h2 style="margin-top:0">${score} / ${qs.length}</h2><p class="date">Best: ${Math.max(best,score)} / 20</p>
+    ${misses.length?`<p><b>Re-read these culturas:</b> ${[...new Set(misses)].sort((a,b)=>a-b).map(n=>'#'+n).join(', ')}</p>`:'<p>Perfect! 🎉</p>'}
+    <button class="btn" onclick="qstart()">Try again</button></div>`;return}
+  const q=qs[qi], opts=shuf(q.slice(1,5));
+  $('#qbox').innerHTML=`<div class="bar"><i style="width:${qi/qs.length*100}%"></i></div><div class="date">Question ${qi+1} of ${qs.length} · score ${score}</div>
+  <div class="card"><div class="es"><b>${esc(q[0])}</b></div>${opts.map(o=>`<button class="opt">${esc(o)}</button>`).join('')}<div class="fb" id="fb"></div></div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(document.querySelector('.opt.ok,.opt.bad'))return;
+    const right=b.textContent===q[1]; if(right)score++; else misses.push(q[5]);
+    document.querySelectorAll('.opt').forEach(x=>{if(x.textContent===q[1])x.classList.add('ok')}); if(!right)b.classList.add('bad');
+    const c=C[q[5]-1];
+    $('#fb').innerHTML=`${right?'✅ ¡Correcto!':'❌ No exactamente.'} From <b>cultura #${c.n}</b> (${c.d}): <i>${esc(c.es)}</i><div class="row"><button class="btn" id="qn">Next ▶</button></div>`;
+    $('#qn').onclick=()=>{qi++;qshow()};
+  });
+}
+qstart();
+
+// find
+const topics={};C.forEach(c=>(topics[c.t]=topics[c.t]||[]).push(c.n));
+const extra=[["Capitals","#6 San Salvador · #11 Ciudad de Guatemala · #16 Tegucigalpa · #20 Managua"],["Dates & years","#1 1968/1988 · #2 Sept 15, 1821 · #4 Sept 15–Oct 15 · #13 2000 a.C. · #23 1990–1997"],["People","#1 Reagan · #18 America Ferrera · #23 Violeta Chamorro"],["Maya","#12 21 idiomas · #13 cuna maya · #19 Copán"],["Food","#10 café · #24 gallo pinto"]];
+$('#idx').innerHTML=Object.entries(topics).map(([t,ns])=>`<tr><td>${t}</td><td>${ns.map(n=>'#'+n).join(', ')}</td></tr>`).join('')+extra.map(([a,b])=>`<tr><td>${a}</td><td>${b}</td></tr>`).join('');
+let dc; function dnext(){dc=C[Math.floor(Math.random()*C.length)];$('#drill').innerHTML=`<div class="es">${esc(Math.random()<.5?dc.es:dc.en)}</div><div class="date" id="dans"></div>`}
+$('#dnext').onclick=dnext; $('#dshow').onclick=()=>$('#dans').innerHTML=`<span class="num">#${dc.n}</span> ${dc.d}`; dnext();
+
+// notebook
+let done=store.get('esp:nb',{});
+function renderNb(){
+  $('#nlist').innerHTML=C.map(c=>`<label class="chk"><input type="checkbox" data-n="${c.n}" ${done[c.n]?'checked':''}><span><b>#${c.n}</b> <span class="date">${c.d}</span> — ${esc(c.es.slice(0,70))}…</span></label>`).join('');
+  const k=C.filter(c=>done[c.n]).length; $('#nbar').style.width=(k/24*100)+'%'; $('#ncount').textContent=`${k} / 24 in notebook`;
+  document.querySelectorAll('#nlist input').forEach(i=>i.onchange=()=>{done[i.dataset.n]=i.checked;store.set('esp:nb',done);renderNb()});
+}
+renderNb();
+
+// tarea checklist
+const T=["Read \"Desayunos Exquisitos\" (read it twice)","Actividades Part 1: Cierto o Falso — and FIX the false ones","Part 2: answer the questions about yourself (no interview needed)","Part 3: skip it — don't do it","Perfil (Ferran Adrià): answer the three questions at the bottom in your notebook"];
+let td=store.get('esp:tarea',{});
+function renderT(){$('#tchk').innerHTML=T.map((t,i)=>`<label class="chk"><input type="checkbox" data-i="${i}" ${td[i]?'checked':''}><span>${esc(t)}</span></label>`).join('');
+  document.querySelectorAll('#tchk input').forEach(x=>x.onchange=()=>{td[x.dataset.i]=x.checked;store.set('esp:tarea',td)})}
+renderT();
+
+// print
+$('#print').innerHTML=`<h1>Cultura Diaria #1–#24 (Sept 22 – Oct 30)</h1><div>Prueba de cultura · lunes 2 de noviembre · open notes</div>`+C.map(c=>`<div class="p"><b>#${c.n} (${c.d})</b> ${esc(c.es)}<div class="e">${esc(c.en)}</div></div>`).join('');
+</script>
+</body>
+</html>
