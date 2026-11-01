@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marathon Runner Review</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{--c:#1f7a5a;--ink:#1a202c;--mute:#5a6678;--bg:#f2f8f5;--line:#d6e6de;--ok:#1f7a4d;--bad:#b3261e}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+  header{background:linear-gradient(135deg,#145c44,#2a9d74);color:#fff;padding:22px 16px 14px;text-align:center}
+  header h1{margin:0;font-size:24px}
+  header p{margin:6px 0 0;font-size:13.5px;opacity:.92}
+  header a{color:#fff;font-size:13px;opacity:.85}
+  nav{display:flex;gap:6px;overflow-x:auto;padding:10px 12px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  nav button{flex:0 0 auto;border:0;background:#e6f1ec;color:var(--ink);font-weight:700;font-size:14px;padding:9px 13px;border-radius:999px;cursor:pointer}
+  nav button.on{background:var(--c);color:#fff}
+  .wrap{max-width:720px;margin:0 auto;padding:14px 16px 50px}
+  .banner{background:#fff;border-left:5px solid var(--c);border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5;margin-bottom:12px}
+  .card{background:#fff;border-radius:14px;padding:14px 15px;margin:10px 0;box-shadow:0 3px 12px rgba(0,0,0,.06);border:1px solid var(--line)}
+  h2{font-size:18px;margin:4px 0 8px}
+  h3{font-size:15px;margin:14px 0 4px;color:var(--c)}
+  .term{font-weight:800}
+  .def{font-size:14.5px;line-height:1.5;color:#2d3a4f}
+  .def.hide{filter:blur(6px);cursor:pointer;user-select:none}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+  .btn{border:0;border-radius:10px;padding:11px 15px;font-weight:700;font-size:15px;cursor:pointer;background:var(--c);color:#fff;text-decoration:none}
+  .btn.ghost{background:#fff;color:var(--c);border:2px solid var(--c)}
+  label.tog{font-size:14px;display:flex;align-items:center;gap:6px}
+  .flash{min-height:200px;display:flex;flex-direction:column;justify-content:center;text-align:center;cursor:pointer}
+  .flash .big{font-size:19px;line-height:1.45}
+  .opt{display:block;width:100%;text-align:left;border:2px solid var(--line);background:#fff;border-radius:10px;padding:11px 12px;margin:7px 0;font-size:15px;cursor:pointer;color:var(--ink)}
+  .opt.ok{border-color:var(--ok);background:#e8f5ee}
+  .opt.bad{border-color:var(--bad);background:#fdecea}
+  .fb{font-size:14px;margin-top:8px;line-height:1.5}
+  .bar{height:8px;background:#dcebe4;border-radius:9px;overflow:hidden;margin:6px 0 2px}
+  .bar i{display:block;height:100%;background:var(--c);width:0}
+  .date{color:var(--mute);font-size:12.5px}
+  table.t{width:100%;border-collapse:collapse;font-size:14px}
+  table.t td,table.t th{padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+  textarea{width:100%;min-height:90px;font-size:15px;padding:10px;border-radius:10px;border:2px solid var(--line);font-family:inherit}
+  .chk{display:flex;gap:10px;align-items:flex-start;padding:7px 2px;font-size:14.5px}
+  .chk input{width:20px;height:20px;flex:0 0 auto}
+  .loop{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13.5px;margin:6px 0}
+  .loop span{background:#e6f1ec;border-radius:8px;padding:6px 9px}
+  .loop b{color:var(--mute)}
+  .hidden{display:none}
+  #print{display:none}
+  @media print{
+    body{background:#fff;color:#000;font-family:Georgia,"Times New Roman",serif}
+    header,nav,.wrap{display:none!important}
+    #print{display:block!important;font-size:10pt;line-height:1.33}
+    #print h1{font-size:14pt;margin:0 0 4pt}
+    #print h3{font-family:Arial,sans-serif;font-size:11pt;margin:8pt 0 2pt;border-bottom:1.5px solid #000}
+    #print table{border-collapse:collapse;width:100%}
+    #print td{border-bottom:1px solid #999;padding:2pt 4pt;vertical-align:top}
+    #print td:first-child{font-weight:bold;width:30%;font-family:Arial,sans-serif}
+    *{color:#000!important;background:#fff!important;box-shadow:none!important}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏃 Unit 1: The Marathon Runner</h1>
+  <p>Regents Biology · Unit 1 test review · study guide due <b>Thu Nov 5, 8:00 AM</b></p>
+  <a href="index.html">← Study Hub</a>
+</header>
+<nav id="nav">
+  <button data-v="story" class="on">🏃 The Runner</button>
+  <button data-v="terms">📖 Terms</button>
+  <button data-v="flash">🃏 Flashcards</button>
+  <button data-v="quiz">✅ Practice</button>
+  <button data-v="explain">✍️ Explain It</button>
+  <button data-v="print">🖨️ Print</button>
+</nav>
+<div class="wrap">
+
+<!-- STORY -->
+<section id="v-story">
+  <div class="banner">The whole unit is one mystery: <b>why did a marathon runner become disoriented and then go into a coma?</b> Each part of the unit tested one possible cause against the medical-tent data.</div>
+  <div class="card">
+    <h2>Normal ranges: what the medical tent checks</h2>
+    <table class="t">
+      <tr><th>Measurement</th><th>Normal</th><th>Unit part</th></tr>
+      <tr><td>Oxygen saturation</td><td>95–100%</td><td>Part 1: Gas exchange &amp; cellular respiration</td></tr>
+      <tr><td>Blood glucose</td><td>90–130 mg/dL</td><td>Part 2: Muscles &amp; energy</td></tr>
+      <tr><td>Body temperature</td><td>37 °C</td><td>Part 3: Thermoregulation</td></tr>
+      <tr><td>Plasma sodium</td><td>135–145 mEq/L</td><td>Part 4: Water balance</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>The four questions</h2>
+    <h3>1 · Did the runner run out of oxygen?</h3>
+    <p class="def">Lungs → alveoli → blood. Red blood cells carry O₂ to muscle cells, and CO₂ goes back to the lungs to be exhaled. Cells need O₂ for <b>aerobic</b> respiration in the <b>mitochondria</b>. Without enough O₂, muscles switch to <b>anaerobic</b> respiration (lactic acid fermentation), which makes much less ATP.</p>
+    <h3>2 · Did the runner run out of energy?</h3>
+    <p class="def">Glucose holds <b>chemical potential energy</b> in its bonds. Cellular respiration releases it as <b>ATP</b> (usable cell energy), with <b>heat</b> released too. Blood glucose is kept steady by the <b>pancreas</b>: <b>insulin</b> lowers it (cells take in glucose, extra stored as <b>glycogen</b>), and <b>glucagon</b> raises it (glycogen broken back down to glucose).</p>
+    <h3>3 · Did the runner overheat?</h3>
+    <p class="def">The <b>hypothalamus</b> (brain) keeps the body near 37 °C. Too hot means <b>sweating</b> and <b>vasodilation</b>: blood vessels near the skin widen to release heat. Too cold means <b>shivering</b>, which makes heat from muscle cellular respiration, and <b>vasoconstriction</b>: vessels narrow to keep heat in.</p>
+    <h3>4 · Did the runner's water balance go wrong? → <u>the answer</u></h3>
+    <p class="def">The runner drank <b>too much plain water</b> while losing salt in sweat. Blood sodium dropped below 135 mEq/L (<b>hyponatremia</b>). The blood became <b>hypotonic</b> compared to the cells, so water moved <b>into</b> cells by <b>osmosis</b> and cells <b>swelled</b>. Swelling brain cells caused the confusion and then the coma. Normally the <b>kidneys</b>, guided by the brain and <b>antidiuretic hormone (ADH)</b>, adjust how much water leaves in urine. This is <b>osmoregulation</b>.</p>
+    <p class="date">That's why sports drinks (water + salt/electrolytes) are recommended over plain water for very long exercise.</p>
+  </div>
+  <div class="card">
+    <h2>Osmosis in one picture</h2>
+    <table class="t">
+      <tr><th>Solution outside the cell</th><th>Water moves…</th><th>Cell…</th></tr>
+      <tr><td><b>Hypotonic</b> (less salt outside)</td><td>into the cell</td><td>swells (can burst)</td></tr>
+      <tr><td><b>Isotonic</b> (same)</td><td>in and out equally</td><td>stays the same ✅</td></tr>
+      <tr><td><b>Hypertonic</b> (more salt outside)</td><td>out of the cell</td><td>shrinks / dehydrates</td></tr>
+    </table>
+    <p class="date">Trick: water moves toward where there is <b>more salt</b>, i.e. less water. "Hypo" sounds like "hippo": the cell swells up like a hippo.</p>
+  </div>
+  <div class="card">
+    <h2>Feedback loops</h2>
+    <p class="def"><b>Negative feedback</b> reverses a change and brings the body back to its set point, like the brakes on a car or a thermostat. Most body processes work this way.</p>
+    <div class="loop"><span>blood glucose ↑ (after eating)</span><b>→</b><span>pancreas releases insulin</span><b>→</b><span>cells take in glucose, store glycogen</span><b>→</b><span>glucose ↓ back to normal</span></div>
+    <div class="loop"><span>body temp ↑</span><b>→</b><span>hypothalamus</span><b>→</b><span>sweat + vasodilation</span><b>→</b><span>temp ↓ back to 37 °C</span></div>
+    <p class="def" style="margin-top:12px"><b>Positive feedback</b> amplifies a change until an endpoint is reached, like pressing the gas pedal.</p>
+    <div class="loop"><span>Childbirth: oxytocin → stronger contractions</span><b>→</b><span>baby pushes down</span><b>→</b><span>more oxytocin</span><b>→</b><span>… until birth</span></div>
+    <div class="loop"><span>Blood clotting: platelets at a cut</span><b>→</b><span>release chemicals</span><b>→</b><span>attract more platelets</span><b>→</b><span>… until the clot forms</span></div>
+  </div>
+  <div class="card">
+    <h2>Cellular respiration</h2>
+    <p class="def" style="font-size:16px;text-align:center"><b>glucose + oxygen → carbon dioxide + water + ATP</b> (+ heat)<br><span class="date">C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + energy</span></p>
+    <table class="t">
+      <tr><th></th><th>Aerobic</th><th>Anaerobic</th></tr>
+      <tr><td>Oxygen?</td><td>Yes</td><td>No</td></tr>
+      <tr><td>Where?</td><td>Mitochondria</td><td>Cytoplasm</td></tr>
+      <tr><td>ATP</td><td>Lots</td><td>Much less (2 ATP)</td></tr>
+      <tr><td>Extra product</td><td>CO₂ + water</td><td>Lactic acid (muscles) · alcohol + CO₂ (yeast)</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- TERMS -->
+<section id="v-terms" class="hidden">
+  <div class="banner">Every term on the Unit 1 study guide. <b>Try saying the definition before you look.</b></div>
+  <div class="row"><label class="tog"><input type="checkbox" id="hideDef" checked> Hide definitions (tap to reveal)</label></div>
+  <div id="terms"></div>
+</section>
+
+<!-- FLASH -->
+<section id="v-flash" class="hidden">
+  <div class="row">
+    <label class="tog"><input type="radio" name="fd" value="t" checked> Term → definition</label>
+    <label class="tog"><input type="radio" name="fd" value="d"> Definition → term</label>
+  </div>
+  <div class="card flash" id="fcard"></div>
+  <div class="row"><button class="btn ghost" id="fprev">◀</button><button class="btn" id="fflip">Flip</button><button class="btn ghost" id="fnext">▶</button><button class="btn ghost" id="fshuf">🔀</button></div>
+  <div class="date" id="fpos"></div>
+</section>
+
+<!-- QUIZ -->
+<section id="v-quiz" class="hidden">
+  <div class="banner">15 Regents-style questions per round, drawn from a bank of 30. Missed topics are listed at the end.</div>
+  <div id="qbox"></div>
+</section>
+
+<!-- EXPLAIN -->
+<section id="v-explain" class="hidden">
+  <div class="banner">These are the five "Explain It" prompts from the study guide. <b>Write your own 1–2 sentences first</b>, then check them against the list of ideas a strong answer includes. This is practice; the study guide still needs your own words.</div>
+  <div id="exp"></div>
+</section>
+
+<!-- PRINT -->
+<section id="v-print" class="hidden">
+  <div class="banner">A one-page black-and-white sheet with every term, the normal ranges, and the osmosis table.</div>
+  <button class="btn" onclick="window.print()">🖨️ Print review sheet</button>
+</section>
+
+</div>
+<div id="print"></div>
+
+<script>
+const T=[
+["Interactions Between Body Systems","Urinary system","Kidneys, bladder and urethra. Filters the blood, removes wastes like urea, and controls water and salt balance by making urine."],
+["Interactions Between Body Systems","Excretory system","Removes metabolic wastes from the body: kidneys (urine), lungs (CO₂) and skin (sweat)."],
+["Interactions Between Body Systems","Circulatory system","Heart, blood and blood vessels. Carries O₂, glucose and hormones to cells and carries CO₂ and wastes away."],
+["Interactions Between Body Systems","Nervous system","Brain, spinal cord and nerves. Detects changes and sends fast signals. The hypothalamus controls body temperature and thirst/ADH."],
+["Interactions Between Body Systems","Muscular system","Muscles that move the body. Muscle cells use lots of ATP from cellular respiration and make heat (e.g. shivering)."],
+["Interactions Between Body Systems","Endocrine system","Glands that release hormones into the blood, e.g. the pancreas (insulin, glucagon) and ADH. Slower but longer-lasting signals."],
+["Interactions Between Body Systems","Respiratory system","Lungs and airways. Brings O₂ into the blood (alveoli) and removes CO₂."],
+["Homeostasis & Feedback Loops","Homeostasis","Keeping a stable internal environment (temperature, glucose, water/salt, O₂) even when outside conditions change."],
+["Homeostasis & Feedback Loops","Negative feedback loop","A response that reverses a change to bring the body back to its set point. Examples: insulin lowering blood glucose, sweating to cool down."],
+["Homeostasis & Feedback Loops","Positive feedback loop","A response that amplifies a change until an endpoint. Examples: oxytocin during childbirth, platelets during blood clotting."],
+["Homeostasis & Feedback Loops","Thermoregulation","Keeping body temperature near 37 °C. Hot: sweating and vasodilation. Cold: shivering and vasoconstriction. Controlled by the hypothalamus."],
+["Osmosis","Cell membrane","The thin, selectively permeable boundary around a cell that controls what goes in and out."],
+["Osmosis","Osmosis","Diffusion of water across a membrane from where there is more water (less solute) to where there is less water (more solute)."],
+["Osmosis","Hypertonic solution","More solute (salt) outside the cell than inside. Water leaves the cell and the cell shrinks."],
+["Osmosis","Hypotonic solution","Less solute (salt) outside the cell than inside. Water enters the cell and the cell swells and may burst."],
+["Osmosis","Isotonic solution","Equal solute inside and outside. Water moves in and out equally, so the cell stays the same size."],
+["Energy & Cellular Respiration","Glucose","A sugar (C₆H₁₂O₆) whose chemical bonds store chemical potential energy. The main fuel for cellular respiration."],
+["Energy & Cellular Respiration","Mitochondria","The organelle where aerobic cellular respiration happens and most ATP is made."],
+["Energy & Cellular Respiration","ATP","The molecule cells use directly for energy. Made by cellular respiration."],
+["Energy & Cellular Respiration","Cellular respiration","Cells breaking down glucose to release its energy as ATP: glucose + O₂ → CO₂ + H₂O + ATP (+ heat)."],
+["Energy & Cellular Respiration","Aerobic respiration","Cellular respiration that uses oxygen. Happens in the mitochondria and makes lots of ATP."],
+["Energy & Cellular Respiration","Anaerobic respiration","Cellular respiration without oxygen. Happens in the cytoplasm and makes much less ATP. Produces lactic acid in muscles, or alcohol + CO₂ in yeast."],
+["Also from class","Insulin","Hormone from the pancreas that lowers blood glucose: cells take in glucose and extra is stored as glycogen."],
+["Also from class","Glucagon","Hormone from the pancreas that raises blood glucose by breaking glycogen back down into glucose."],
+["Also from class","Glycogen","The storage form of glucose, kept in the liver and muscles."],
+["Also from class","Antidiuretic hormone (ADH)","Hormone that tells the kidneys to keep more water. More ADH means less, more concentrated urine."],
+["Also from class","Osmoregulation","Keeping the right balance of water and solutes so cells stay isotonic with body fluids. Done mainly by the kidneys."],
+["Also from class","Hyponatremia","Blood sodium too low (below 135 mEq/L), often from drinking too much plain water. Cells swell, which in the brain causes confusion and coma."],
+["Also from class","Vasodilation / vasoconstriction","Blood vessels near the skin widening (release heat) / narrowing (keep heat in)."],
+["Also from class","Chemical potential energy","Energy stored in chemical bonds (like glucose), released during a chemical reaction."]
+];
+const Q=[
+["Which organelle is the site of aerobic cellular respiration?","mitochondria","nucleus","cell membrane","ribosome","Cellular respiration"],
+["What are the products of aerobic cellular respiration?","carbon dioxide, water and ATP","glucose and oxygen","lactic acid only","oxygen and water","Cellular respiration"],
+["Compared with aerobic respiration, anaerobic respiration…","produces much less ATP","produces more ATP","requires more oxygen","happens in the mitochondria","Aerobic vs anaerobic"],
+["During a sprint, muscle cells low on oxygen produce…","lactic acid","alcohol","glycogen","insulin","Aerobic vs anaerobic"],
+["Yeast performing anaerobic respiration produce…","alcohol and carbon dioxide","lactic acid and oxygen","glucose and oxygen","glycogen and water","Aerobic vs anaerobic"],
+["The energy in glucose is stored as…","chemical potential energy in its bonds","heat energy","kinetic energy of the molecule","light energy","Energy"],
+["Which molecule do cells use directly for energy?","ATP","glucose","glycogen","oxygen","Energy"],
+["Which pair of systems works most directly to deliver oxygen to muscle cells?","respiratory and circulatory","urinary and nervous","endocrine and excretory","muscular and urinary","Body systems"],
+["Which system releases hormones such as insulin into the blood?","endocrine","nervous","urinary","respiratory","Body systems"],
+["The kidneys are part of which system(s)?","urinary / excretory","respiratory","nervous","muscular","Body systems"],
+["After a meal, blood glucose rises. The pancreas responds by releasing…","insulin","glucagon","ADH","oxytocin","Blood glucose"],
+["Between meals during a long run, blood glucose falls. The pancreas releases glucagon, which…","breaks down glycogen to release glucose","stores glucose as glycogen","lowers blood glucose","increases sweating","Blood glucose"],
+["Glycogen is…","the storage form of glucose","a hormone that lowers glucose","a waste product of respiration","a type of protein","Blood glucose"],
+["Insulin lowering high blood glucose back to normal is an example of…","negative feedback","positive feedback","anaerobic respiration","osmosis","Feedback loops"],
+["Which is an example of positive feedback?","oxytocin increasing contractions during childbirth","sweating when hot","shivering when cold","insulin lowering blood glucose","Feedback loops"],
+["The main difference between negative and positive feedback is that negative feedback…","reverses a change, while positive feedback amplifies it","amplifies a change, while positive feedback reverses it","only happens in plants","only involves the nervous system","Feedback loops"],
+["Homeostasis is best described as…","maintaining a stable internal environment","the growth of an organism","the movement of water across a membrane","the release of energy from glucose","Homeostasis"],
+["When the body overheats, which responses help cool it?","sweating and vasodilation","shivering and vasoconstriction","releasing insulin","making more ATP","Thermoregulation"],
+["Shivering helps warm the body because…","muscle cellular respiration releases heat","it widens blood vessels","it releases sweat","it lowers blood glucose","Thermoregulation"],
+["Which part of the brain controls body temperature?","hypothalamus","cerebellum","brain stem only","pancreas","Thermoregulation"],
+["Normal human body temperature is about…","37 °C","98 °C","27 °C","42 °C","Normal ranges"],
+["Osmosis is the movement of…","water across a membrane","salt across a membrane","glucose into mitochondria","oxygen into red blood cells","Osmosis"],
+["A red blood cell placed in a hypotonic solution will…","swell as water moves in","shrink as water moves out","stay the same size","make more ATP","Osmosis"],
+["A cell placed in a hypertonic (very salty) solution will…","shrink as water moves out","swell as water moves in","burst immediately","stay the same size","Osmosis"],
+["In an isotonic solution, a cell…","stays the same size","swells","shrinks","dies","Osmosis"],
+["The marathon runner drank large amounts of plain water. Blood sodium fell below 135 mEq/L. This condition is…","hyponatremia","hypothermia","hypoglycemia","dehydration","The runner"],
+["Why did the runner's brain cells swell?","the blood became hypotonic, so water moved into cells by osmosis","the blood became hypertonic, so water left cells","the cells ran out of ATP","the body temperature rose above 37 °C","The runner"],
+["Which organ adjusts how much water leaves the body in urine?","kidneys","lungs","pancreas","heart","Water balance"],
+["Antidiuretic hormone (ADH) causes the kidneys to…","keep more water, making less urine","release more water, making more urine","release insulin","store glycogen","Water balance"],
+["Normal plasma sodium is…","135–145 mEq/L","90–130 mg/dL","95–100%","37 °C","Normal ranges"]
+];
+const E=[
+["Explain how the urinary system works with the circulatory system to maintain homeostasis.",["The circulatory system brings blood to the kidneys","The kidneys filter the blood, removing wastes (urea) and extra water/salt as urine","Useful substances are reabsorbed back into the blood","This keeps water and salt levels in the blood stable (homeostasis)"]],
+["Explain the relationship between red blood cells, oxygen, and cellular respiration.",["Red blood cells pick up O₂ in the lungs and carry it to body cells","Cells use O₂ in aerobic cellular respiration (in the mitochondria)","Respiration releases energy from glucose as ATP","CO₂ produced is carried back to the lungs to be exhaled"]],
+["Explain the difference between a negative feedback loop and a positive feedback loop. Give an example of each.",["Negative feedback reverses a change, back to the set point","Example: insulin lowering blood glucose, or sweating to cool down","Positive feedback amplifies a change until an endpoint","Example: oxytocin in childbirth, or platelets in blood clotting"]],
+["How does the energy stored in glucose become available to cells?",["Glucose stores chemical potential energy in its bonds","Cellular respiration breaks glucose down (with O₂, in the mitochondria)","The energy is transferred to ATP, which cells use directly","Some energy is released as heat"]],
+["Explain how drinking too much water can disrupt homeostasis. Include the role of sodium concentration, osmosis, and changes in cell size.",["Too much plain water dilutes blood sodium (below 135 mEq/L, hyponatremia)","The blood becomes hypotonic compared to the cells","Water moves into cells by osmosis","Cells swell; swollen brain cells cause confusion, coma"]]
+];
+
+const $=s=>document.querySelector(s), esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+  $('#v-'+b.dataset.v).classList.remove('hidden'); window.scrollTo(0,0);
+});
+
+// terms
+function renderTerms(){
+  const hide=$('#hideDef').checked; let g='', h='';
+  T.forEach(t=>{ if(t[0]!==g){g=t[0]; h+=`<h3>${esc(g)}</h3>`;} h+=`<div class="card"><div class="term">${esc(t[1])}</div><div class="def ${hide?'hide':''}" onclick="this.classList.remove('hide')">${esc(t[2])}</div></div>`;});
+  $('#terms').innerHTML=h;
+}
+$('#hideDef').onchange=renderTerms; renderTerms();
+
+// flash
+let fo=T.slice(), fi=0, ff=false;
+function fshow(){const t=fo[fi], d=document.querySelector('input[name=fd]:checked').value;
+  const front=d==='t'?t[1]:t[2], back=d==='t'?t[2]:t[1];
+  $('#fcard').innerHTML=`<div class="date">${esc(t[0])}</div><div class="big" style="margin-top:10px;${(ff?back:front)===t[1]?'font-weight:800':''}">${esc(ff?back:front)}</div><div class="date" style="margin-top:10px">${ff?'':'tap to flip'}</div>`;
+  $('#fpos').textContent=`${fi+1} / ${fo.length}`;}
+$('#fcard').onclick=$('#fflip').onclick=()=>{ff=!ff;fshow()};
+$('#fnext').onclick=()=>{fi=(fi+1)%fo.length;ff=false;fshow()};
+$('#fprev').onclick=()=>{fi=(fi-1+fo.length)%fo.length;ff=false;fshow()};
+$('#fshuf').onclick=()=>{fo=shuf(T);fi=0;ff=false;fshow()};
+document.querySelectorAll('input[name=fd]').forEach(r=>r.onchange=()=>{ff=false;fshow()});
+fshow();
+
+// quiz
+let qs=[],qi=0,score=0,miss=[];
+function qstart(){qs=shuf(Q).slice(0,15);qi=0;score=0;miss=[];qshow()}
+function qshow(){
+  if(qi>=qs.length){const best=store.get('bio:best',0); if(score>best)store.set('bio:best',score);
+    $('#qbox').innerHTML=`<div class="card"><h2>${score} / ${qs.length}</h2><p class="date">Best: ${Math.max(best,score)} / 15</p>${miss.length?`<p><b>Review:</b> ${[...new Set(miss)].join(', ')}</p>`:'<p>Perfect! 🎉</p>'}<button class="btn" onclick="qstart()">New round</button></div>`;return}
+  const q=qs[qi], opts=shuf(q.slice(1,5));
+  $('#qbox').innerHTML=`<div class="bar"><i style="width:${qi/qs.length*100}%"></i></div><div class="date">Question ${qi+1} of ${qs.length} · score ${score}</div>
+  <div class="card"><div style="font-size:16px;line-height:1.45"><b>${esc(q[0])}</b></div>${opts.map((o,i)=>`<button class="opt">(${i+1}) ${esc(o)}</button>`).join('')}<div class="fb" id="fb"></div></div>`;
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+    if(document.querySelector('.opt.ok,.opt.bad'))return;
+    const txt=b.textContent.replace(/^\(\d\) /,''), right=txt===q[1]; if(right)score++; else miss.push(q[5]);
+    document.querySelectorAll('.opt').forEach(x=>{if(x.textContent.replace(/^\(\d\) /,'')===q[1])x.classList.add('ok')}); if(!right)b.classList.add('bad');
+    $('#fb').innerHTML=`${right?'✅ Correct.':'❌ Not quite.'} <span class="date">Topic: ${q[5]}</span><div class="row"><button class="btn" id="qn">Next ▶</button></div>`;
+    $('#qn').onclick=()=>{qi++;qshow()};
+  });
+}
+qstart();
+
+// explain
+let ex=store.get('bio:explain',{});
+$('#exp').innerHTML=E.map((e,i)=>`<div class="card"><div><b>${i+1}. ${esc(e[0])}</b></div>
+ <textarea id="ta${i}" placeholder="Write your answer here…">${esc(ex[i]||'')}</textarea>
+ <div class="row"><button class="btn ghost" data-i="${i}">Check my answer</button></div>
+ <div class="hidden" id="ck${i}"><p class="date">Does your answer include…</p>${e[1].map(k=>`<label class="chk"><input type="checkbox"><span>${esc(k)}</span></label>`).join('')}</div></div>`).join('');
+E.forEach((e,i)=>{$('#ta'+i).oninput=ev=>{ex[i]=ev.target.value;store.set('bio:explain',ex)};});
+document.querySelectorAll('#exp .btn').forEach(b=>b.onclick=()=>$('#ck'+b.dataset.i).classList.remove('hidden'));
+
+// print
+let ph='<h1>Unit 1: The Marathon Runner: Review Sheet</h1>';
+ph+='<h3>Normal ranges</h3><table><tr><td>Oxygen saturation</td><td>95–100%</td></tr><tr><td>Blood glucose</td><td>90–130 mg/dL</td></tr><tr><td>Body temperature</td><td>37 °C</td></tr><tr><td>Plasma sodium</td><td>135–145 mEq/L (below = hyponatremia, the runner\'s problem)</td></tr></table>';
+ph+='<h3>Osmosis</h3><table><tr><td>Hypotonic outside</td><td>water moves IN, cell swells</td></tr><tr><td>Isotonic</td><td>no net change</td></tr><tr><td>Hypertonic outside</td><td>water moves OUT, cell shrinks</td></tr></table>';
+ph+='<h3>Cellular respiration</h3><div>glucose + O₂ → CO₂ + H₂O + ATP (+ heat). Aerobic: uses O₂, mitochondria, lots of ATP. Anaerobic: no O₂, cytoplasm, little ATP, lactic acid (muscles) or alcohol + CO₂ (yeast).</div>';
+let g='';T.forEach(t=>{if(t[0]!==g){if(g)ph+='</table>';g=t[0];ph+=`<h3>${esc(g)}</h3><table>`;}ph+=`<tr><td>${esc(t[1])}</td><td>${esc(t[2])}</td></tr>`;});ph+='</table>';
+$('#print').innerHTML=ph;
+</script>
+</body>
+</html>
