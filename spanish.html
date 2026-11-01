@@ -72,6 +72,7 @@
   <button data-v="find">🔎 ¿Dónde está?</button>
   <button data-v="notes">📒 Cuaderno</button>
   <button data-v="tarea">📝 Tarea</button>
+  <button data-v="boot">🥾 Verbos (Nov 6)</button>
 </nav>
 <div class="wrap">
 
@@ -115,6 +116,33 @@
   <div class="bar"><i id="nbar"></i></div><div class="date" id="ncount"></div>
   <div id="nlist"></div>
   <div class="row"><button class="btn" onclick="window.print()">🖨️ Print all 24 (B&amp;W)</button><a class="btn ghost" style="text-decoration:none" href="cultura-diaria.pdf" target="_blank">📘 PDF of all 24</a></div>
+</section>
+
+<!-- BOOT VERBS -->
+<section id="v-boot" class="hidden">
+  <div class="banner"><b>Quiz on stem-changing ("boot") verbs: viernes 6 de noviembre.</b> The stem changes in every form <b>inside the boot</b> (yo, tú, él/ella/Ud., ellos/ellas/Uds.) and stays the same for <b>nosotros</b>, which is outside the boot.</div>
+  <div class="card">
+    <h2 style="margin-top:0">The boot</h2>
+    <table class="idx" style="max-width:420px">
+      <tr><td style="background:#fbe7cf">yo <b>pido</b></td><td>nosotros <b>pedimos</b></td></tr>
+      <tr><td style="background:#fbe7cf">tú <b>pides</b></td><td style="color:#999">(vosotros pedís)</td></tr>
+      <tr><td style="background:#fbe7cf">él/ella/Ud. <b>pide</b></td><td style="background:#fbe7cf">ellos/Uds. <b>piden</b></td></tr>
+    </table>
+    <p class="date">Shaded forms are inside the boot, so the stem changes. Endings are the normal -ar/-er/-ir endings.</p>
+    <div id="bootlists"></div>
+  </div>
+  <div class="row">
+    <label class="tog"><input type="radio" name="bm" value="conj" checked> Conjugate</label>
+    <label class="tog"><input type="radio" name="bm" value="type"> Which change?</label>
+    <label class="tog"><input type="radio" name="bm" value="sent"> En el restaurante</label>
+  </div>
+  <div class="row">
+    <label class="tog"><input type="checkbox" class="bg" value="e>ie" checked> e→ie</label>
+    <label class="tog"><input type="checkbox" class="bg" value="o>ue" checked> o→ue</label>
+    <label class="tog"><input type="checkbox" class="bg" value="e>i" checked> e→i</label>
+  </div>
+  <div class="date" id="bscore"></div>
+  <div class="card" id="bbox"></div>
 </section>
 
 <!-- TAREA -->
@@ -302,6 +330,64 @@ let td=store.get('esp:tarea',{});
 function renderT(){$('#tchk').innerHTML=T.map((t,i)=>`<label class="chk"><input type="checkbox" data-i="${i}" ${td[i]?'checked':''}><span>${esc(t)}</span></label>`).join('');
   document.querySelectorAll('#tchk input').forEach(x=>x.onchange=()=>{td[x.dataset.i]=x.checked;store.set('esp:tarea',td)})}
 renderT();
+
+// boot verbs
+const V=[
+ ["pensar","to think","e>ie"],["querer","to want","e>ie"],["preferir","to prefer","e>ie"],["empezar","to begin","e>ie"],["entender","to understand","e>ie"],["cerrar","to close","e>ie"],["perder","to lose","e>ie"],["recomendar","to recommend","e>ie"],
+ ["poder","to be able to","o>ue"],["dormir","to sleep","o>ue"],["almorzar","to have lunch","o>ue"],["volver","to return","o>ue"],["encontrar","to find","o>ue"],["costar","to cost","o>ue"],["contar","to count / tell","o>ue"],["jugar","to play (u→ue)","o>ue"],
+ ["pedir","to order / ask for","e>i"],["servir","to serve","e>i"],["repetir","to repeat","e>i"],["medir","to measure","e>i"]
+];
+const P=[["yo","o","o","o"],["tú","as","es","es"],["él / ella / Ud.","a","e","e"],["nosotros","amos","emos","imos"],["ellos / Uds.","an","en","en"]];
+function conj(inf,ch,pi){
+  const end=inf.slice(-2), stem=inf.slice(0,-2), k=end==='ar'?1:end==='er'?2:3, boot=pi!==3;
+  let s=stem;
+  if(boot){const from=inf==='jugar'?'u':ch[0], to=ch.split('>')[1]; const i=stem.lastIndexOf(from); s=stem.slice(0,i)+to+stem.slice(i+1);}
+  return s+P[pi][k];
+}
+const S=[
+ ["Yo siempre ___ (pedir) el arroz con pollo.","pedir",0],["El mesero ___ (servir) la comida.","servir",2],["¿Qué ___ (recomendar) usted?","recomendar",2],
+ ["Nosotros ___ (pedir) la cuenta.","pedir",3],["¿Cuánto ___ (costar) el flan?","costar",2],["Mis padres ___ (preferir) el pescado.","preferir",4],
+ ["Tú ___ (querer) un vaso de agua, ¿verdad?","querer",1],["Nosotros ___ (almorzar) a las doce.","almorzar",3],["Los meseros ___ (servir) el postre.","servir",4],
+ ["Yo no ___ (poder) comer más. ¡Estoy lleno!","poder",0],["Ella ___ (pensar) que la sopa está deliciosa.","pensar",2],["Ustedes ___ (volver) al restaurante mañana.","volver",4],
+ ["¿Tú ___ (almorzar) en la cafetería?","almorzar",1],["Yo ___ (querer) la ensalada, por favor.","querer",0],["Nosotros ___ (preferir) la mesa cerca de la ventana.","preferir",3],
+ ["El restaurante ___ (cerrar) a las diez.","cerrar",2],["¿Me ___ (repetir) el pedido, por favor? (Ud.)","repetir",2],["Yo siempre ___ (dormir) después del almuerzo.","dormir",0]
+];
+const norm=s=>s.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+let bs={r:0,t:0}, bmiss=store.get('esp:bootmiss',{});
+document.getElementById('bootlists').innerHTML=["e>ie","o>ue","e>i"].map(g=>`<p style="margin:8px 0"><b>${g.replace('>','→')}:</b> ${V.filter(v=>v[2]===g).map(v=>`${v[0]} <span class="date">(${v[1]})</span>`).join(', ')}</p>`).join('');
+function bgroups(){return [...document.querySelectorAll('.bg:checked')].map(x=>x.value)}
+function bpick(arr,key){ // weight missed items
+  const w=arr.map(a=>1+2*(bmiss[key(a)]||0)); let r=Math.random()*w.reduce((a,b)=>a+b,0);
+  for(let i=0;i<arr.length;i++){r-=w[i];if(r<=0)return arr[i]} return arr[arr.length-1];}
+function bmark(ok,key){bs.t++; if(ok){bs.r++; if(bmiss[key])bmiss[key]=Math.max(0,bmiss[key]-1)} else bmiss[key]=(bmiss[key]||0)+1; store.set('esp:bootmiss',bmiss);
+  $('#bscore').textContent=`This session: ${bs.r} / ${bs.t}`;}
+function bnext(){
+  const mode=document.querySelector('input[name=bm]:checked').value, gs=bgroups(); if(!gs.length){$('#bbox').innerHTML='Pick at least one group.';return}
+  const pool=V.filter(v=>gs.includes(v[2]));
+  if(mode==='conj'||mode==='sent'){
+    let inf,pi,prompt;
+    if(mode==='conj'){const v=bpick(pool,v=>v[0]); inf=v[0]; pi=Math.floor(Math.random()*5); prompt=`<b>${inf}</b> <span class="date">(${v[1]})</span> → <b>${P[pi][0]}</b>`;}
+    else{const sp=S.filter(s=>gs.includes(V.find(v=>v[0]===s[1])[2])); if(!sp.length){$('#bbox').innerHTML='No sentences for that group.';return}
+      const s=bpick(sp,s=>s[0]); inf=s[1]; pi=s[2]; prompt=esc(s[0]);}
+    const ch=V.find(v=>v[0]===inf)[2], ans=conj(inf,ch,pi), key=inf+'|'+pi;
+    $('#bbox').innerHTML=`<div class="es">${prompt}</div><div class="row"><input id="bin" autocomplete="off" autocapitalize="off" style="font-size:17px;padding:10px;border-radius:10px;border:2px solid var(--line);flex:1;min-width:160px"><button class="btn" id="bgo">Check</button></div><div class="fb" id="bfb"></div>`;
+    const inp=$('#bin'); inp.focus();
+    const go=()=>{ if($('#bfb').dataset.done){bnext();return}
+      const ok=norm(inp.value)===norm(ans); bmark(ok,key); $('#bfb').dataset.done=1;
+      const why=pi===3?'nosotros is outside the boot, so no stem change.':`inside the boot, so ${ch.replace('>','→')}${inf==='jugar'?' (jugar: u→ue)':''}.`;
+      $('#bfb').innerHTML=`${ok?'✅ ¡Correcto!':'❌ It\'s <b>'+ans+'</b>.'} <span class="date">${P[pi][0]}: ${why}</span><div class="date">Press Enter or Check for the next one.</div>`;
+      $('#bgo').textContent='Next ▶';};
+    $('#bgo').onclick=go; inp.onkeydown=e=>{if(e.key==='Enter')go()};
+  } else {
+    const v=bpick(pool,v=>v[0]), key='type|'+v[0];
+    $('#bbox').innerHTML=`<div class="es">Which stem change does <b>${v[0]}</b> <span class="date">(${v[1]})</span> have?</div>${["e>ie","o>ue","e>i"].map(g=>`<button class="opt" data-g="${g}">${g.replace('>','→')}</button>`).join('')}<div class="fb" id="bfb"></div>`;
+    document.querySelectorAll('#bbox .opt').forEach(b=>b.onclick=()=>{ if($('#bfb').dataset.done)return; $('#bfb').dataset.done=1;
+      const ok=b.dataset.g===v[2]; bmark(ok,key);
+      document.querySelectorAll('#bbox .opt').forEach(x=>{if(x.dataset.g===v[2])x.classList.add('ok')}); if(!ok)b.classList.add('bad');
+      $('#bfb').innerHTML=`${ok?'✅':'❌'} yo <b>${conj(v[0],v[2],0)}</b> · nosotros <b>${conj(v[0],v[2],3)}</b><div class="row"><button class="btn" id="bn">Next ▶</button></div>`; $('#bn').onclick=bnext;});
+  }
+}
+document.querySelectorAll('input[name=bm],.bg').forEach(x=>x.onchange=bnext); bnext();
 
 // print
 $('#print').innerHTML=`<h1>Cultura Diaria #1–#24 (Sept 22 – Oct 30)</h1><div>Prueba de cultura · lunes 2 de noviembre · open notes</div>`+C.map(c=>`<div class="p"><b>#${c.n} (${c.d})</b> ${esc(c.es)}<div class="e">${esc(c.en)}</div></div>`).join('');
